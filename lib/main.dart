@@ -1,19 +1,26 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart' show SystemChrome, SystemUiOverlayStyle;
+import 'package:tjini_app/ui/resources/app_theme.dart';
+import 'package:tjini_app/ui/screens/login_screen.dart';
 
 void main() {
-  runApp(const MainApp());
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(statusBarColor: Colors.white),
+  );
+  runApp(const TjiniApp());
 }
 
-class MainApp extends StatelessWidget {
-  const MainApp({super.key});
+class TjiniApp extends StatelessWidget {
+  const TjiniApp({super.key});
 
   @override
   Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
+    return GestureDetector(
+      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+      child: MaterialApp(
+        theme: AppTheme.theme,
+        debugShowCheckedModeBanner: false,
+        home: LoginScreen(),
       ),
     );
   }
