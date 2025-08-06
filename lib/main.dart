@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemChrome, SystemUiOverlayStyle;
 import 'package:tjini_app/ui/resources/app_theme.dart';
 import 'package:tjini_app/ui/screens/login_screen.dart';
+import 'package:tjini_app/ui/screens/parent_profile_screen.dart';
 
 void main() {
   SystemChrome.setSystemUIOverlayStyle(
@@ -20,7 +21,7 @@ class TjiniApp extends StatelessWidget {
       child: MaterialApp(
         theme: AppTheme.theme,
         debugShowCheckedModeBanner: false,
-        home: LoginScreen(),
+        home: ParentProfileScreen(),
       ),
     );
   }
