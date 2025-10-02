@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "368989871531",
+    "project_id": "tjini-app",
+    "storage_bucket": "tjini-app.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:368989871531:android:5fd6e1b4d1c8c1843886ee",
+        "android_client_info": {
+          "package_name": "com.example.tjini_app"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAusToKvywpwgx5FldcJ0smJeWEo7wrGL4"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

@@ -1,0 +1,56 @@
+import 'package:multiple_result/multiple_result.dart';
+import 'package:tjini_app/core/apis/api_endpoints.dart';
+import 'package:tjini_app/core/apis/api_service.dart';
+import 'package:tjini_app/models/cutom_exception.dart';
+import 'package:tjini_app/models/login_response.dart';
+import 'package:tjini_app/repositories/remote/iremote_repository.dart';
+
+class RemoteRepository implements IRemoteRepository {
+  @override
+  Future<Result<AuthResponse, CustomException>> login({
+    required String email,
+    required String password,
+    required String token,
+  }) async {
+    try {
+      final response = await ApiService().postRequest(ApiEndpoints.login, {
+        "email": email,
+        "password": password,
+        "device_token": token,
+      });
+      return Result.success(
+        AuthResponse.fromJson(response.data as Map<String, dynamic>),
+      );
+    } on CustomException catch (e) {
+      // ExceptionHandler.handleException(e);
+      return Result.error(CustomException(message: e.message));
+    } on Exception catch (e) {
+      return Result.error(CustomException(message: e.toString()));
+    }
+  }
+
+  @override
+  Future<Result<AuthResponse, CustomException>> resetPassword({
+    required String email,
+    required String password,
+  }) async {
+    try {
+      final response = await ApiService().postRequest(
+        ApiEndpoints.resetPassword,
+        {
+          "email": email,
+          "password": password,
+          "password_confirmation": password,
+        },
+      );
+      return Result.success(
+        AuthResponse.fromJson(response.data as Map<String, dynamic>),
+      );
+    } on CustomException catch (e) {
+      // ExceptionHandler.handleException(e);
+      return Result.error(CustomException(message: e.message));
+    } on Exception catch (e) {
+      return Result.error(CustomException(message: e.toString()));
+    }
+  }
+}

@@ -7,3 +7,10 @@ enum DispatcherStatus {
   pickUpCarUnavailable,
   additionalDelay,
 }
+
+enum ToastType {
+  message,
+  error,
+  success,
+}
+
