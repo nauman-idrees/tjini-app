@@ -8,7 +8,7 @@ class SharedPreferencesHelper {
   static const String _keyAccessToken = 'access_token';
   static const String _keyUserId = 'user_id';
   static const String _isLoggedIn = 'is_logged_in';
-
+  static const String _keyFcmToken = 'fcm_token';
   SharedPreferencesHelper(this._prefs);
 
   // Save methods
@@ -24,6 +24,10 @@ class SharedPreferencesHelper {
     _prefs.setBool(_isLoggedIn, value);
   }
 
+  void saveFcmToken(String token) {
+    _prefs.setString(_keyFcmToken, token);
+  }
+
   bool isLoggedIn() {
     return _prefs.getBool(_isLoggedIn) ?? false;
   }
@@ -35,6 +39,10 @@ class SharedPreferencesHelper {
 
   String? getUserId() {
     return _prefs.getString(_keyUserId);
+  }
+
+  String? getFcmToken() {
+    return _prefs.getString(_keyFcmToken);
   }
 
 // Clear all saved data

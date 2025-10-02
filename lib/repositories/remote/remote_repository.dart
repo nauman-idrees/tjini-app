@@ -7,19 +7,25 @@ import 'package:tjini_app/repositories/remote/iremote_repository.dart';
 
 class RemoteRepository implements IRemoteRepository {
   @override
-  Future<Result<AuthResponse, CustomException>> login({
+  Future<Result<LoginResponse, CustomException>> login({
     required String email,
     required String password,
-    required String token,
+    String? token,
   }) async {
     try {
-      final response = await ApiService().postRequest(ApiEndpoints.login, {
+      Map<String, dynamic> data = {
         "email": email,
         "password": password,
-        "device_token": token,
-      });
+      };
+      if (token != null) {
+        data["device_token"] = token;
+      }
+      final response = await ApiService().postRequest(
+        ApiEndpoints.login,
+        data,
+      );
       return Result.success(
-        AuthResponse.fromJson(response.data as Map<String, dynamic>),
+        LoginResponse.fromJson(response.data as Map<String, dynamic>),
       );
     } on CustomException catch (e) {
       // ExceptionHandler.handleException(e);
@@ -30,7 +36,7 @@ class RemoteRepository implements IRemoteRepository {
   }
 
   @override
-  Future<Result<AuthResponse, CustomException>> resetPassword({
+  Future<Result<LoginResponse, CustomException>> resetPassword({
     required String email,
     required String password,
   }) async {
@@ -44,7 +50,7 @@ class RemoteRepository implements IRemoteRepository {
         },
       );
       return Result.success(
-        AuthResponse.fromJson(response.data as Map<String, dynamic>),
+        LoginResponse.fromJson(response.data as Map<String, dynamic>),
       );
     } on CustomException catch (e) {
       // ExceptionHandler.handleException(e);

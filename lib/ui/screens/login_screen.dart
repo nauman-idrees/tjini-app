@@ -1,8 +1,11 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:provider/provider.dart';
+import 'package:tjini_app/core/enum.dart';
 import 'package:tjini_app/provider/auth_provider.dart';
+import 'package:tjini_app/provider/user_provider.dart';
 import 'package:tjini_app/ui/common/main_button.dart';
 import 'package:tjini_app/ui/resources/app_colors.dart';
 import 'package:tjini_app/ui/resources/app_routes.dart';
@@ -85,11 +88,36 @@ class LoginScreen extends HookWidget {
                                 context.read<AuthProvider>().login(
                                   email: emailController.text,
                                   password: passwordController.text,
-                                  onSuccess: () {
-                                    Navigator.pushNamed(
-                                      context,
-                                      AppRoutes.parentProfileRoute,
-                                    );
+                                  onSuccess: (user) {
+                                    context.read<UserProvider>().setUser(user);
+                                    Permission.notification.request();
+                                    if (user.roles.any(
+                                      (role) => role.name == UserRole.parent,
+                                    )) {
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.parentProfileRoute,
+                                      );
+                                    }
+
+                                    if (user.roles.any(
+                                      (role) =>
+                                          role.name == UserRole.dispatcher,
+                                    )) {
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.establishmentProfileRoute,
+                                      );
+                                    }
+
+                                    if (user.roles.any(
+                                      (role) => role.name == UserRole.viewer,
+                                    )) {
+                                      Navigator.pushNamed(
+                                        context,
+                                        AppRoutes.viewerProfileRoute,
+                                      );
+                                    }
                                   },
                                 );
                               }

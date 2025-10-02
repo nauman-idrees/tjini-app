@@ -7,15 +7,28 @@ extension StringExtension on String {
   }
 }
 
-extension ParentStatusExtension on ParentStatus {
+extension ParentStatusExtension on ParentAction {
   String title() {
     switch (this) {
-      case ParentStatus.someoneElseIsComing:
+      case ParentAction.someoneElseIsComing:
         return "Quelqu'un d'autre vient récupérer".hardcoded();
-      case ParentStatus.pickUpOnCar:
+      case ParentAction.pickUpOnCar:
         return "Récupération en voiture".hardcoded();
-      case ParentStatus.pickUpInside:
+      case ParentAction.pickUpInside:
         return "Récupération à l'intérieur".hardcoded();
+    }
+  }
+}
+
+extension DispatcherStatusExtension on DispatcherAction {
+  String title() {
+    switch (this) {
+      case DispatcherAction.receptionCallingYou:
+        return "On vous demande à L'accueil. ".hardcoded();
+      case DispatcherAction.pickUpCarUnavailable:
+        return "Pick up en voiture NON DISPONIBLE. ".hardcoded();
+      case DispatcherAction.additionalDelay:
+        return "RETARD ADDITIONNEL.".hardcoded();
     }
   }
 }
