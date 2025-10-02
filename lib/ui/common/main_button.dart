@@ -8,6 +8,7 @@ class MainButton extends StatelessWidget {
     required this.title,
     required this.onPressed,
     this.isDisabled = false,
+    this.isLoading = false,
   });
 
   final String title;
@@ -15,6 +16,7 @@ class MainButton extends StatelessWidget {
   final Color? textColor;
   final VoidCallback onPressed;
   final bool isDisabled;
+  final bool isLoading;
 
   @override
   Widget build(BuildContext context) {
@@ -30,10 +32,19 @@ class MainButton extends StatelessWidget {
                 ? WidgetStateProperty.all(buttonColor)
                 : null,
           ),
-          child: Text(
-            title,
-            style: TextStyle(color: textColor),
-          ),
+          child: isLoading
+              ? SizedBox(
+                  height: 20,
+                  width: 20,
+                  child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 2,
+                  ),
+                )
+              : Text(
+                  title,
+                  style: TextStyle(color: textColor),
+                ),
         ),
       ),
     );

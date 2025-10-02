@@ -1,10 +1,20 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemChrome, SystemUiOverlayStyle;
+import 'package:provider/provider.dart';
+import 'package:tjini_app/core/di/locator.dart';
+import 'package:tjini_app/firebase_options.dart';
+import 'package:tjini_app/provider/auth_provider.dart';
+import 'package:tjini_app/repositories/remote/iremote_repository.dart';
+import 'package:tjini_app/ui/resources/app_routes.dart';
 import 'package:tjini_app/ui/resources/app_theme.dart';
-import 'package:tjini_app/ui/screens/login_screen.dart';
-import 'package:tjini_app/ui/screens/parent_profile_screen.dart';
 
-void main() {
+Future<void> main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+  await setupLocator();
   SystemChrome.setSystemUIOverlayStyle(
     const SystemUiOverlayStyle(statusBarColor: Colors.white),
   );
@@ -16,12 +26,22 @@ class TjiniApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
-      child: MaterialApp(
-        theme: AppTheme.theme,
-        debugShowCheckedModeBanner: false,
-        home: ParentProfileScreen(),
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider(
+          create: (_) => AuthProvider(
+            remoteRepository: locator<IRemoteRepository>(),
+          ),
+        ),
+      ],
+      child: GestureDetector(
+        onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
+        child: MaterialApp(
+          theme: AppTheme.theme,
+          debugShowCheckedModeBanner: false,
+          initialRoute: AppRoutes.initialRoute,
+          onGenerateRoute: AppRoutes.generateRoute,
+        ),
       ),
     );
   }
