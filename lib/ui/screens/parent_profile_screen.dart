@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:provider/provider.dart';
 import 'package:tjini_app/core/extensions.dart';
+import 'package:tjini_app/provider/user_provider.dart';
 import 'package:tjini_app/ui/common/header_widget.dart';
 import 'package:tjini_app/ui/common/image_widget.dart';
 import 'package:tjini_app/ui/common/main_button.dart';
@@ -17,6 +19,7 @@ class ParentProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.read<UserProvider>().getUser();
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -43,8 +46,8 @@ class ParentProfileScreen extends StatelessWidget {
                     ),
                   ),
                   const Gap(5),
-                  TextWidget(title: "Maman de"),
-                  Spacer(),
+                  TextWidget(title: "${user?.firstName}\n${user?.lastName}"),
+                  const Spacer(),
                   Stack(
                     alignment: Alignment.center,
                     children: [
@@ -144,12 +147,12 @@ class ParentProfileScreen extends StatelessWidget {
               const Gap(30),
               Column(
                 children: [
-                  ...ParentStatus.values.map((status) {
+                  ...ParentAction.values.map((status) {
                     return Padding(
                       padding: const EdgeInsets.only(left: 20),
                       child: SelectionItem(
                         title: status.title(),
-                        isSelected: status == ParentStatus.someoneElseIsComing,
+                        isSelected: status == ParentAction.someoneElseIsComing,
                       ),
                     );
                   }),

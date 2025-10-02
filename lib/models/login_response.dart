@@ -1,32 +1,34 @@
 import 'dart:convert';
 
-class AuthResponse {
+import 'package:tjini_app/core/enum.dart';
+
+class LoginResponse {
   User? user;
   String? token;
   String message;
 
-  AuthResponse({
+  LoginResponse({
     required this.user,
     required this.token,
     required this.message,
   });
 
-  AuthResponse copyWith({
+  LoginResponse copyWith({
     User? user,
     String? token,
     String? message,
-  }) => AuthResponse(
+  }) => LoginResponse(
     user: user ?? this.user,
     token: token ?? this.token,
     message: message ?? this.message,
   );
 
-  factory AuthResponse.fromRawJson(String str) =>
-      AuthResponse.fromJson(json.decode(str));
+  factory LoginResponse.fromRawJson(String str) =>
+      LoginResponse.fromJson(json.decode(str));
 
   String toRawJson() => json.encode(toJson());
 
-  factory AuthResponse.fromJson(Map<String, dynamic> json) => AuthResponse(
+  factory LoginResponse.fromJson(Map<String, dynamic> json) => LoginResponse(
     user: json["user"] == null ? null : User.fromJson(json["user"]),
     token: json["token"],
     message: json["message"],
@@ -46,10 +48,10 @@ class User {
   String email;
   dynamic emailVerifiedAt;
   int schoolId;
-  int isPrimary;
-  String relation;
-  String childName;
-  String deviceToken;
+  int? isPrimary;
+  String? relation;
+  String? childName;
+  String? deviceToken;
   DateTime createdAt;
   DateTime updatedAt;
   List<Role> roles;
@@ -139,7 +141,7 @@ class User {
 
 class Role {
   int id;
-  String name;
+  UserRole name;
   String guardName;
   DateTime createdAt;
   DateTime updatedAt;
@@ -156,14 +158,14 @@ class Role {
 
   Role copyWith({
     int? id,
-    String? name,
+    UserRole? name, // FIX: was String?
     String? guardName,
     DateTime? createdAt,
     DateTime? updatedAt,
     Pivot? pivot,
   }) => Role(
     id: id ?? this.id,
-    name: name ?? this.name,
+    name: name ?? this.name, // now UserRole
     guardName: guardName ?? this.guardName,
     createdAt: createdAt ?? this.createdAt,
     updatedAt: updatedAt ?? this.updatedAt,
@@ -176,7 +178,7 @@ class Role {
 
   factory Role.fromJson(Map<String, dynamic> json) => Role(
     id: json["id"],
-    name: json["name"],
+    name: _parseUserRole(json["name"]), // FIX: parse to UserRole
     guardName: json["guard_name"],
     createdAt: DateTime.parse(json["created_at"]),
     updatedAt: DateTime.parse(json["updated_at"]),
@@ -185,7 +187,7 @@ class Role {
 
   Map<String, dynamic> toJson() => {
     "id": id,
-    "name": name,
+    "name": name.name,
     "guard_name": guardName,
     "created_at": createdAt.toIso8601String(),
     "updated_at": updatedAt.toIso8601String(),
@@ -229,4 +231,15 @@ class Pivot {
     "model_id": modelId,
     "role_id": roleId,
   };
+}
+
+UserRole _parseUserRole(Object? value) {
+  if (value is String) {
+    final lower = value.toLowerCase();
+    for (final r in UserRole.values) {
+      if (r.name.toLowerCase() == lower) return r;
+    }
+  }
+  // Fallback: pick a sensible default or throw. Using 'viewer' as safe default.
+  return UserRole.viewer;
 }

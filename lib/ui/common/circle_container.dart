@@ -10,13 +10,14 @@ class CircleContainer extends StatelessWidget {
     this.width = 100,
     this.height = 100,
     this.borderWidth = 5,
+    this.borderColor,
   });
-
   final Widget child;
   final Color color;
   final double width;
   final double height;
   final double borderWidth;
+  final Color? borderColor;
 
   @override
   Widget build(BuildContext context) {
@@ -26,7 +27,7 @@ class CircleContainer extends StatelessWidget {
       decoration: BoxDecoration(
         color: color,
         shape: BoxShape.circle,
-        border: Border.all(color: AppColors.green, width: borderWidth),
+        border: Border.all(color: borderColor ?? AppColors.green, width: borderWidth),
       ),
       child: child,
     );

@@ -4,6 +4,7 @@ import 'package:tjini_app/core/enum.dart';
 import 'package:tjini_app/core/extensions.dart';
 import 'package:tjini_app/core/helper/shared_preferences_helper.dart';
 import 'package:tjini_app/core/utils/toast_utils.dart';
+import 'package:tjini_app/models/login_response.dart';
 import 'package:tjini_app/repositories/remote/iremote_repository.dart';
 
 class AuthProvider extends ChangeNotifier {
@@ -17,22 +18,26 @@ class AuthProvider extends ChangeNotifier {
   Future<void> login({
     required String email,
     required String password,
-    VoidCallback? onSuccess,
+    Function(User)? onSuccess,
   }) async {
     isLoading = true;
     notifyListeners();
+    final fcmToken = locator<SharedPreferencesHelper>().getFcmToken();
     final result = await _remoteRepository.login(
       email: email,
       password: password,
-      token: "token",
+      token: fcmToken,
     );
     result.when(
       (data) {
         locator<SharedPreferencesHelper>().saveIsLoggedIn(true);
-        ToastUtils.show(msg: "Connecté avec succès".hardcoded(), type: ToastType.success);
+        ToastUtils.show(
+          msg: "Connecté avec succès".hardcoded(),
+          type: ToastType.success,
+        );
         isLoading = false;
         notifyListeners();
-        onSuccess?.call();
+        onSuccess?.call(data.user!);
       },
       (error) {
         ToastUtils.show(msg: error.message, type: ToastType.error);
