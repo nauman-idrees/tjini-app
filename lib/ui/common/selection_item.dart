@@ -9,21 +9,26 @@ class SelectionItem extends StatelessWidget {
     super.key,
     required this.title,
     required this.isSelected,
+    required this.onTap,
   });
 
   final String title;
   final bool isSelected;
+  final VoidCallback onTap;
 
   @override
   Widget build(BuildContext context) {
     return Row(
       children: [
-        Container(
-          height: 10,
-          width: 10,
-          decoration: BoxDecoration(
-            shape: BoxShape.circle,
-            color: isSelected ? Colors.black : AppColors.grey,
+        GestureDetector(
+          onTap: onTap,
+          child: Container(
+            height: 10,
+            width: 10,
+            decoration: BoxDecoration(
+              shape: BoxShape.circle,
+              color: isSelected ? Colors.black : AppColors.grey,
+            ),
           ),
         ),
         const Gap(15),

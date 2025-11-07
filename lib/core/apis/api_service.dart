@@ -136,4 +136,29 @@ class ApiService {
     }
     throw CustomException(message: errorDescription);
   }
+
+  Future<Response> sendNotification(
+      String endpoint,
+      Map<String, dynamic> data,
+      String token,
+      ) async {
+    try {
+      final response = await _dio.post(
+        endpoint,
+        data: data,
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+      _handleResponse(response);
+      return response;
+    } on DioException catch (e) {
+      _handleError(e);
+      rethrow;
+    }
+  }
+
 }

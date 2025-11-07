@@ -1,7 +1,10 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
+import 'package:tjini_app/core/di/locator.dart';
 import 'package:tjini_app/core/extensions.dart';
+import 'package:tjini_app/core/helper/shared_preferences_helper.dart';
+import 'package:tjini_app/provider/parent_provider.dart';
 import 'package:tjini_app/provider/user_provider.dart';
 import 'package:tjini_app/ui/common/header_widget.dart';
 import 'package:tjini_app/ui/common/image_widget.dart';
@@ -10,6 +13,9 @@ import 'package:tjini_app/ui/common/text_widget.dart';
 import 'package:tjini_app/ui/resources/app_colors.dart';
 
 import '../../core/enum.dart';
+import '../../models/notification_model.dart';
+import '../../provider/average_time_provider.dart';
+import '../../provider/notification_provider.dart';
 import '../common/circle_container.dart';
 import '../common/round_action.dart';
 import '../common/selection_item.dart';
@@ -20,6 +26,13 @@ class ParentProfileScreen extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final user = context.read<UserProvider>().getUser();
+    print(user!.deviceToken);
+    final avgProvider  = Provider.of<AverageTimeProvider>(context);
+    final parentProvider = Provider.of<ParentProvider>(context);
+    final notificationProvider = Provider.of<NotificationProvider>(context);
+    final notificationModel = notificationProvider.latestNotification;
+    final isNextStep = notificationProvider.isNextStep;
+    bool isChangingTime = false;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -65,7 +78,7 @@ class ParentProfileScreen extends StatelessWidget {
                             borderWidth: 6,
                             child: Center(
                               child: TextWidget(
-                                title: "10\nmin",
+                                title: "${avgProvider.time}\nmin",
                                 size: 18,
                                 weight: FontWeight.w400,
                                 align: TextAlign.center,
@@ -77,12 +90,20 @@ class ParentProfileScreen extends StatelessWidget {
                       Positioned(
                         right: 15,
                         child: RoundAction(
+                          onTap: () {
+                            isChangingTime = true;
+                            avgProvider.increment();
+                            },
                           icon: Icons.add,
                         ),
                       ),
                       Positioned(
                         left: 15,
                         child: RoundAction(
+                          onTap: () {
+                            isChangingTime = true;
+                            avgProvider.decrement();
+                            },
                           icon: Icons.remove,
                         ),
                       ),
@@ -139,25 +160,47 @@ class ParentProfileScreen extends StatelessWidget {
                 width: MediaQuery.sizeOf(context).width / 1.4,
                 child: MainButton(
                   title: 'Notification Etablissement'.hardcoded(),
-                  onPressed: () {},
+                  onPressed: () {
+
+                  },
                   textColor: Colors.white,
                   buttonColor: AppColors.primaryColor,
                 ),
               ),
               const Gap(30),
-              Column(
+              notificationModel !=null && notificationModel.type == 'pickup' && isNextStep == false
+                  ? Column(
+                children: [
+                  ...MainParentAction.values.map((status) {
+                    return Padding(
+                      padding: const EdgeInsets.only(left: 20),
+                      child: SelectionItem(
+                        title: status.title(),
+                        isSelected: parentProvider.isMainSelected(status),
+                        onTap: () {
+                          parentProvider.toggleMainSelection(status);
+                        },
+                      ),
+                    );
+                  }),
+                ],
+              ) : SizedBox(),
+              isNextStep == true ? Column(
                 children: [
                   ...ParentAction.values.map((status) {
                     return Padding(
                       padding: const EdgeInsets.only(left: 20),
                       child: SelectionItem(
                         title: status.title(),
-                        isSelected: status == ParentAction.someoneElseIsComing,
+                        isSelected: parentProvider.isSelected(status),
+                        onTap: () {
+                          parentProvider.toggleSelection(status);
+                        },
                       ),
                     );
                   }),
                 ],
-              ),
+              ) : SizedBox(),
               const Spacer(),
               MainButton(
                 title: 'Connection'.hardcoded(),

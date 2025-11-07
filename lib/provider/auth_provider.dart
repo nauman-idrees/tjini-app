@@ -31,6 +31,7 @@ class AuthProvider extends ChangeNotifier {
     result.when(
       (data) {
         locator<SharedPreferencesHelper>().saveIsLoggedIn(true);
+        locator<SharedPreferencesHelper>().saveCurrentUser(data);
         ToastUtils.show(
           msg: "Connecté avec succès".hardcoded(),
           type: ToastType.success,

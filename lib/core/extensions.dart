@@ -20,6 +20,19 @@ extension ParentStatusExtension on ParentAction {
   }
 }
 
+extension MainParentStatusExtension on MainParentAction {
+  String title() {
+    switch (this) {
+      case MainParentAction.mother:
+        return "Mère".hardcoded();
+      case MainParentAction.father:
+        return "Père".hardcoded();
+      case MainParentAction.familyMember:
+        return "Membre de la famille".hardcoded();
+    }
+  }
+}
+
 extension DispatcherStatusExtension on DispatcherAction {
   String title() {
     switch (this) {

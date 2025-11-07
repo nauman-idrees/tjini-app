@@ -6,13 +6,21 @@ import 'package:tjini_app/core/di/locator.dart';
 import 'package:tjini_app/core/services/firebase_messaging_service.dart';
 import 'package:tjini_app/firebase_options.dart';
 import 'package:tjini_app/provider/auth_provider.dart';
+import 'package:tjini_app/provider/average_time_provider.dart';
+import 'package:tjini_app/provider/dispatcher_provider.dart';
+import 'package:tjini_app/provider/notification_provider.dart';
+import 'package:tjini_app/provider/parent_provider.dart';
 import 'package:tjini_app/provider/user_provider.dart';
 import 'package:tjini_app/repositories/remote/iremote_repository.dart';
 import 'package:tjini_app/ui/resources/app_routes.dart';
 import 'package:tjini_app/ui/resources/app_theme.dart';
 
+import 'core/services/notification_service.dart';
+
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+  await NotificationService.initialize();
+
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
@@ -38,6 +46,18 @@ class TjiniApp extends StatelessWidget {
         ),
         ChangeNotifierProvider(
           create: (_) => UserProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => DispatcherProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => AverageTimeProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => ParentProvider(),
+        ),
+        ChangeNotifierProvider(
+          create: (_) => NotificationProvider(),
         ),
       ],
       child: GestureDetector(

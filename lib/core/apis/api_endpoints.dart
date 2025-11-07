@@ -3,4 +3,6 @@ class ApiEndpoints {
   static const String baseUrl = 'https://tjiniapp.fr/api/';
   static const String login = 'login';
   static const String resetPassword = 'forgot-password';
+  static const String notify = 'notify/users';
+  static const String notification = 'notifications';
 }

@@ -1,6 +1,7 @@
 enum ImageType { asset, network }
 
 enum ParentAction { someoneElseIsComing, pickUpOnCar, pickUpInside }
+enum MainParentAction { mother, father, familyMember }
 
 enum DispatcherAction {
   receptionCallingYou,

@@ -5,14 +5,21 @@ import '../../core/enum.dart';
 import 'image_widget.dart';
 
 class HeaderWidget extends StatelessWidget {
-  const HeaderWidget({super.key});
+  final bool? isChildView;
+  final VoidCallback? onTap;
+  const HeaderWidget({super.key, this.isChildView = false, this.onTap});
 
   @override
   Widget build(BuildContext context) {
-    return const Row(
+    return Row(
       mainAxisAlignment: MainAxisAlignment.spaceBetween,
       children: [
-        Gap(16),
+        isChildView!
+            ? GestureDetector(
+          onTap: onTap,
+          child: Icon(Icons.arrow_back, size: 25,),
+        )
+            : Gap(16),
         ImageWidget(
           imageSrc: 'assets/ic_text_logo.png',
           type: ImageType.asset,
