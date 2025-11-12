@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
 import 'package:tjini_app/core/helper/shared_preferences_helper.dart';
+import 'package:tjini_app/provider/notification_provider.dart';
 import 'package:tjini_app/provider/user_provider.dart';
 import 'package:tjini_app/ui/screens/login_screen.dart';
 import 'package:tjini_app/ui/screens/viewer_screen.dart';
@@ -24,6 +25,7 @@ class AppWrapperScreen extends StatelessWidget {
       currentUser = await locator<SharedPreferencesHelper>().getCurrentUser();
       if(currentUser != null) {
         context.read<UserProvider>().setUser(currentUser!.user!);
+        context.read<NotificationProvider>().getNotification(currentUser!.token!);
       }
       return HomeState(isLoggedIn: isLoggedIn);
     }
@@ -55,14 +57,12 @@ class AppWrapperScreen extends StatelessWidget {
           (role) => role.name == UserRole.parent,
     )) {
       return ParentProfileScreen();
-    }else if (roles.any(
-          (role) =>
-      role.name == UserRole.dispatcher,
-    )) {
+    }else {
       return EstablishmentProfileScreen();
-    } else {
-      return ViewerScreen();
     }
+    // else {
+    //   return ViewerScreen();
+    // }
   }
 
   Scaffold _showLoading() {

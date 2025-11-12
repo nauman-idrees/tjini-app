@@ -1,7 +1,7 @@
 import 'package:flutter/foundation.dart';
 
 class AverageTimeProvider extends ChangeNotifier {
-  int _time = 10;
+  int _time = 0;
 
   int get time => _time;
 
@@ -18,7 +18,7 @@ class AverageTimeProvider extends ChangeNotifier {
   }
 
   void reset() {
-    _time = 10;
+    _time = 0;
     notifyListeners();
   }
 }

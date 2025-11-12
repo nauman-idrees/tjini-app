@@ -4,6 +4,7 @@ import 'package:provider/provider.dart';
 import 'package:tjini_app/core/di/locator.dart';
 import 'package:tjini_app/core/extensions.dart';
 import 'package:tjini_app/core/helper/shared_preferences_helper.dart';
+import 'package:tjini_app/models/login_response.dart';
 import 'package:tjini_app/provider/parent_provider.dart';
 import 'package:tjini_app/provider/user_provider.dart';
 import 'package:tjini_app/ui/common/header_widget.dart';
@@ -11,28 +12,23 @@ import 'package:tjini_app/ui/common/image_widget.dart';
 import 'package:tjini_app/ui/common/main_button.dart';
 import 'package:tjini_app/ui/common/text_widget.dart';
 import 'package:tjini_app/ui/resources/app_colors.dart';
-
 import '../../core/enum.dart';
-import '../../models/notification_model.dart';
 import '../../provider/average_time_provider.dart';
 import '../../provider/notification_provider.dart';
 import '../common/circle_container.dart';
 import '../common/round_action.dart';
 import '../common/selection_item.dart';
 
+bool isChangingTime = false;
 class ParentProfileScreen extends StatelessWidget {
   const ParentProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final user = context.read<UserProvider>().getUser();
-    print(user!.deviceToken);
     final avgProvider  = Provider.of<AverageTimeProvider>(context);
     final parentProvider = Provider.of<ParentProvider>(context);
     final notificationProvider = Provider.of<NotificationProvider>(context);
-    final notificationModel = notificationProvider.latestNotification;
-    final isNextStep = notificationProvider.isNextStep;
-    bool isChangingTime = false;
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -144,15 +140,27 @@ class ParentProfileScreen extends StatelessWidget {
                       TextWidget(title: "Nom de l'école"),
                     ],
                   ),
-                  SizedBox(
+                  !notificationProvider.latestNotification.any((element) => element.type! == "ready-to-go",)
+                  && !notificationProvider.latestNotification.any((element) => element.type! == "arrived",)
+                      ? SizedBox(
                     width: MediaQuery.sizeOf(context).width / 1.8,
                     child: MainButton(
                       title: 'En court de préparation'.hardcoded(),
-                      onPressed: () {},
+                      onPressed: () async{
+                        LoginResponse? currentUser = await locator<SharedPreferencesHelper>().getCurrentUser();
+                        if(currentUser != null) {
+                          await notificationProvider.sendParentNotification(
+                              "ready-to-go",
+                              "Ready To Go",
+                              currentUser.user!.id,
+                              currentUser.token!
+                          );
+                        }
+                      },
                       textColor: Colors.black,
                       buttonColor: AppColors.grey,
                     ),
-                  ),
+                  ) : SizedBox(),
                 ],
               ),
               const Gap(30),
@@ -160,15 +168,62 @@ class ParentProfileScreen extends StatelessWidget {
                 width: MediaQuery.sizeOf(context).width / 1.4,
                 child: MainButton(
                   title: 'Notification Etablissement'.hardcoded(),
-                  onPressed: () {
+                  onPressed: () async{
+                    LoginResponse? currentUser = await locator<SharedPreferencesHelper>().getCurrentUser();
+                    if(currentUser != null) {
+                      if (parentProvider.selectedMainAction != null) {
+                        await notificationProvider.sendParentNotification(
+                            "who-coming",
+                            "${parentProvider.selectedMainAction!.name} is coming",
+                            currentUser.user!.id,
+                            currentUser.token!
+                        );
+                        parentProvider.clearSelection();
+                      }
 
+                      if (parentProvider.selectedAction != null) {
+                        await notificationProvider.sendParentNotification(
+                            parentProvider.selectedAction == ParentAction.pickUpInside
+                                ? "inside-pickup" : parentProvider.selectedAction == ParentAction.pickUpOnCar
+                                ? "car-pickup" : "someone-else-coming",
+                            parentProvider.selectedAction == ParentAction.pickUpInside
+                                ? "Pickup inside"
+                                : parentProvider.selectedAction == ParentAction.pickUpOnCar
+                                ?  "Pickup by car"
+                            : "Someone else is coming.",
+                            currentUser.user!.id,
+                            currentUser.token!
+                        );
+                        parentProvider.clearSelection();
+                      }
+
+                      if(isChangingTime){
+                        if(!notificationProvider.latestNotification.any((element) => element.type! == "arrival-time",)){
+                          await notificationProvider.sendParentNotification(
+                              "arrival-time",
+                              "I will arrive in ${avgProvider.time} min.",
+                              currentUser.user!.id,
+                              currentUser.token!
+                          );
+                        }else{
+                          await notificationProvider.sendParentNotification(
+                              "delay-time",
+                              "I will be late for ${avgProvider.time} min.",
+                              currentUser.user!.id,
+                              currentUser.token!
+                          );
+                        }
+                        avgProvider.reset();
+                        isChangingTime = false;
+                      }
+                    }
                   },
                   textColor: Colors.white,
                   buttonColor: AppColors.primaryColor,
                 ),
               ),
               const Gap(30),
-              notificationModel !=null && notificationModel.type == 'pickup' && isNextStep == false
+              !notificationProvider.latestNotification.any((element) => element.type! == "who-coming",)
                   ? Column(
                 children: [
                   ...MainParentAction.values.map((status) {
@@ -184,8 +239,7 @@ class ParentProfileScreen extends StatelessWidget {
                     );
                   }),
                 ],
-              ) : SizedBox(),
-              isNextStep == true ? Column(
+              ) : Column(
                 children: [
                   ...ParentAction.values.map((status) {
                     return Padding(
@@ -200,11 +254,21 @@ class ParentProfileScreen extends StatelessWidget {
                     );
                   }),
                 ],
-              ) : SizedBox(),
+              ),
               const Spacer(),
               MainButton(
-                title: 'Connection'.hardcoded(),
-                onPressed: () {},
+                title: 'Je suis là'.hardcoded(),
+                onPressed: () async{
+                  LoginResponse? currentUser = await locator<SharedPreferencesHelper>().getCurrentUser();
+                  if(currentUser != null) {
+                    await notificationProvider.sendParentNotification(
+                        "arrived",
+                        "I'm here",
+                        currentUser.user!.id,
+                        currentUser.token!
+                    );
+                  }
+                },
                 textColor: Colors.white,
                 buttonColor: AppColors.primaryColor,
               ),

@@ -12,6 +12,7 @@ import '../common/main_button.dart';
 import '../common/round_action.dart';
 import '../common/selection_item.dart';
 import '../common/text_widget.dart';
+import 'establishment_profile_screen.dart';
 
 class ChildDetailScreen extends StatelessWidget {
   const ChildDetailScreen({super.key});
@@ -104,6 +105,63 @@ class ChildDetailScreen extends StatelessWidget {
                 ],
               ),
               Gap(30),
+              Padding(
+                padding: const EdgeInsets.all(8.0),
+                child: Row(
+                  children: [
+                    Spacer(),
+                    ...ParentStatus.values.map((status) {
+                      return GestureDetector(
+                        onTap: () => dispatcherProvider.toggleStudentSelection(status),
+                        child: Container(
+                          width: 30,
+                          height: 30,
+                          padding: EdgeInsets.all(2),
+                          margin: EdgeInsets.only(right: 5),
+                          decoration: BoxDecoration(
+                            color: Colors.white,
+                            shape: BoxShape.circle,
+                            boxShadow: [
+                              BoxShadow(
+                                offset: Offset(0.2, 1),
+                                color: Colors.grey,
+                                blurRadius: 2,
+                                spreadRadius: 0.3,
+                              ),
+                            ],
+                          ),
+                          child: Container(
+                            width: double.infinity,
+                            height: double.infinity,
+                            decoration: BoxDecoration(
+                              shape: BoxShape.circle,
+                              color: dispatcherProvider.selectedStudentAction == status ? Colors.green : Colors.white,
+                            ),
+                          ),
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsets.only(right: 4.0),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.end,
+                  children: List.generate(
+                    ParentStatus.values.length,
+                        (index) {
+                      return TextWidget(
+                        title:
+                        "${ParentStatus.values[index].title()}${index != ParentStatus.values.length - 1 ? " | " : ""}",
+                        size: 10,
+                        weight: FontWeight.w500,
+                      );
+                    },
+                  ),
+                ),
+              ),
+              Gap(10),
               MainButton(
                 title: 'Parent de notification'.hardcoded(),
                 buttonColor: Colors.black,

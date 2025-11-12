@@ -20,3 +20,25 @@ enum UserRole{
   dispatcher,
   viewer,
 }
+
+enum ParentMessageType {
+  // Parent side
+  whoComing,
+  delayTime,
+  arrivalTime,
+  arrived,
+  carPickup,
+  insidePickup,
+}
+
+enum DispatcherMessageType {
+  // Dispatcher side
+  preparing,
+  ready,
+  collected,
+  droppedOff,
+  dispatcherArrivalTime,
+  dispatcherDelayTime,
+  receptionCalling,
+  carUnavailable,
+}

@@ -3,10 +3,12 @@ import 'dart:io';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
 import 'package:tjini_app/core/di/locator.dart';
+import 'package:tjini_app/core/enum.dart';
 import 'package:tjini_app/core/helper/shared_preferences_helper.dart';
 import 'package:tjini_app/models/notification_model.dart';
 import 'package:tjini_app/provider/notification_provider.dart';
 
+import '../../models/login_response.dart';
 import 'notification_service.dart';
 
 class FirebaseMessagingService {
@@ -41,14 +43,7 @@ class FirebaseMessagingService {
   static Future<void> _firebaseMessagingBackgroundHandler(
     RemoteMessage message,
   ) async {
-    locator<NotificationProvider>().addNewNotification(
-        NotificationModels(
-          type: message.data['type'],
-          dateTime: DateTime.now(),
-          message: message.data['message'],
-        )
-    );
-    locator<NotificationProvider>().refreshNotifications();
+
     print("Background Message:");
     print(message.data);
 
@@ -60,17 +55,17 @@ class FirebaseMessagingService {
       body: body,
       payload: message.data.map((key, value) => MapEntry(key, value.toString())),
     );
+
+    LoginResponse? loginResponse = await locator<SharedPreferencesHelper>().getCurrentUser();
+    if(loginResponse != null){
+      if(loginResponse.user!.roles.any((element) => element.name == UserRole.parent,)){
+        NotificationProvider().getNotification(loginResponse.token!);
+      }
+    }
   }
 
   static Future<void> _onMessageHandler(RemoteMessage message) async {
-    locator<NotificationProvider>().addNewNotification(
-        NotificationModels(
-          type: message.data['type'],
-          dateTime: DateTime.now(),
-          message: message.data['message'],
-        )
-    );
-    locator<NotificationProvider>().refreshNotifications();
+
     print("Foreground Message:");
     print(message.data);
 
@@ -82,17 +77,16 @@ class FirebaseMessagingService {
       body: body,
       payload: message.data.map((key, value) => MapEntry(key, value.toString())),
     );
+    LoginResponse? loginResponse = await locator<SharedPreferencesHelper>().getCurrentUser();
+    if(loginResponse != null){
+      if(loginResponse.user!.roles.any((element) => element.name == UserRole.parent,)){
+        NotificationProvider().getNotification(loginResponse.token!);
+      }
+    }
   }
 
   static Future<void> _onMessageOpenAppHandler(RemoteMessage message) async {
-    locator<NotificationProvider>().addNewNotification(
-        NotificationModels(
-          type: message.data['type'],
-          dateTime: DateTime.now(),
-          message: message.data['message'],
-        )
-    );
-    locator<NotificationProvider>().refreshNotifications();
+
     print("Notification Opened:");
     print(message.data);
 
@@ -104,5 +98,11 @@ class FirebaseMessagingService {
       body: body,
       payload: message.data.map((key, value) => MapEntry(key, value.toString())),
     );
+    LoginResponse? loginResponse = await locator<SharedPreferencesHelper>().getCurrentUser();
+    if(loginResponse != null){
+      if(loginResponse.user!.roles.any((element) => element.name == UserRole.parent,)){
+        NotificationProvider().getNotification(loginResponse.token!);
+      }
+    }
   }
 }

@@ -161,4 +161,27 @@ class ApiService {
     }
   }
 
+  Future<Response> getNotification(
+      String endpoint,
+      String token,
+      ) async {
+    try {
+      final response = await _dio.get(
+        endpoint,
+        options: Options(
+          headers: {
+            "Authorization": "Bearer $token",
+            "Content-Type": "application/json",
+          },
+        ),
+      );
+      _handleResponse(response);
+      return response;
+    } on DioException catch (e) {
+      _handleError(e);
+      rethrow;
+    }
+  }
+
+
 }

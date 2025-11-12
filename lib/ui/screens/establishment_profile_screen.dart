@@ -1,16 +1,14 @@
 import 'package:flutter/material.dart';
 import 'package:gap/gap.dart';
+import 'package:provider/provider.dart';
 import 'package:tjini_app/core/enum.dart';
 import 'package:tjini_app/core/extensions.dart';
 import 'package:tjini_app/ui/common/circle_container.dart';
 import 'package:tjini_app/ui/common/header_widget.dart';
 import 'package:tjini_app/ui/common/image_widget.dart';
-import 'package:tjini_app/ui/common/main_button.dart';
-import 'package:tjini_app/ui/common/round_action.dart';
-import 'package:tjini_app/ui/common/selection_item.dart';
 import 'package:tjini_app/ui/common/text_widget.dart';
 import 'package:tjini_app/ui/resources/app_colors.dart';
-
+import '../../provider/user_provider.dart';
 import 'child_detail_screen.dart';
 
 class EstablishmentProfileScreen extends StatelessWidget {
@@ -18,6 +16,7 @@ class EstablishmentProfileScreen extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.read<UserProvider>().getUser();
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -108,10 +107,14 @@ class EstablishmentProfileScreen extends StatelessWidget {
                       final parent = mockParents[index];
                       return ParentListingTile(
                           parent: parent,
-                        onTap: () => Navigator.push(context, MaterialPageRoute(
-                            builder: (context) => ChildDetailScreen(),
-                        ),
-                        ),
+                        onTap: () {
+                            if(user!.roles.any(
+                                  (role) => role.name == UserRole.dispatcher,
+                            )) {
+                              Navigator.push(context, MaterialPageRoute(
+                                builder: (context) => ChildDetailScreen(),),);
+                            }
+                        },
                       );
                     },
 

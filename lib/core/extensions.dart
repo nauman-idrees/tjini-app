@@ -98,3 +98,48 @@ extension ValidateFields on String? {
     return null;
   }
 }
+
+
+extension ParentMessageTypeMessageExtension on ParentMessageType {
+  String get message {
+    switch (this) {
+    // ---- Parent Side ----
+      case ParentMessageType.whoComing:
+        return "Mother is coming";
+      case ParentMessageType.delayTime:
+        return "I will be late for 10 min.";
+      case ParentMessageType.arrivalTime:
+        return "I will arrive in 10 min.";
+      case ParentMessageType.arrived:
+        return "I'm here";
+      case ParentMessageType.carPickup:
+        return "Pickup by car";
+      case ParentMessageType.insidePickup:
+        return "Pickup inside";
+    }
+  }
+}
+
+extension MessageTypeCodeExtension on DispatcherMessageType {
+  String get code {
+    switch (this) {
+    // ---- Dispatcher Side ----
+      case DispatcherMessageType.preparing:
+        return "preparing";
+      case DispatcherMessageType.ready:
+        return "ready";
+      case DispatcherMessageType.collected:
+        return "collected";
+      case DispatcherMessageType.droppedOff:
+        return "dropped-off";
+      case DispatcherMessageType.dispatcherArrivalTime:
+        return "arrival-time";
+      case DispatcherMessageType.dispatcherDelayTime:
+        return "delay-time";
+      case DispatcherMessageType.receptionCalling:
+        return "reception-calling";
+      case DispatcherMessageType.carUnavailable:
+        return "car-unavailable";
+    }
+  }
+}

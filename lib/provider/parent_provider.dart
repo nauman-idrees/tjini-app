@@ -37,6 +37,7 @@ class ParentProvider extends ChangeNotifier {
 
   void clearSelection() {
     _selectedAction = null;
+    _selectedMainAction = null;
     notifyListeners();
   }
 }

@@ -47,46 +47,46 @@ class SharedPreferencesHelper {
     return null;
   }
 
-  Future<void> addNotification(NotificationModels notification) async {
-    final existing = getNotificationList();
-
-    existing.add(notification);
-    await _prefs.setString(
-      _keyNotificationList,
-      NotificationModels.listToJson(existing),
-    );
-  }
-
- List<NotificationModels> getNotificationList()  {
-    final jsonString = _prefs.getString(_keyNotificationList);
-    if (jsonString == null) return [];
-    return NotificationModels.listFromJson(jsonString);
-  }
-
-  Future<void> deleteOldNotifications() async {
-    final list = getNotificationList();
-    final now = DateTime.now();
-
-    final filtered = list.where((n) {
-      final diff = now.difference(n.dateTime);
-      return diff.inHours < 2;
-    }).toList();
-
-    await _prefs.setString(
-      _keyNotificationList,
-      NotificationModels.listToJson(filtered),
-    );
-  }
-
-  NotificationModels? getLatestNotification()  {
-     deleteOldNotifications();
-
-    final list =  getNotificationList();
-    if (list.isEmpty) return null;
-
-    list.sort((a, b) => b.dateTime.compareTo(a.dateTime));
-    return list.first;
-  }
+ //  Future<void> addNotification(NotificationModels notification) async {
+ //    final existing = getNotificationList();
+ //
+ //    existing.add(notification);
+ //    await _prefs.setString(
+ //      _keyNotificationList,
+ //      NotificationModels.listToJson(existing),
+ //    );
+ //  }
+ //
+ // List<NotificationModels> getNotificationList()  {
+ //    final jsonString = _prefs.getString(_keyNotificationList);
+ //    if (jsonString == null) return [];
+ //    return NotificationModels.listFromJson(jsonString);
+ //  }
+ //
+ //  Future<void> deleteOldNotifications() async {
+ //    final list = getNotificationList();
+ //    final now = DateTime.now();
+ //
+ //    final filtered = list.where((n) {
+ //      final diff = now.difference(n.dateTime);
+ //      return diff.inHours < 2;
+ //    }).toList();
+ //
+ //    await _prefs.setString(
+ //      _keyNotificationList,
+ //      NotificationModels.listToJson(filtered),
+ //    );
+ //  }
+ //
+ //  NotificationModels? getLatestNotification()  {
+ //     deleteOldNotifications();
+ //
+ //    final list =  getNotificationList();
+ //    if (list.isEmpty) return null;
+ //
+ //    list.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+ //    return list.first;
+ //  }
 
   bool isLoggedIn() {
     return _prefs.getBool(_isLoggedIn) ?? false;
