@@ -1,6 +1,7 @@
 enum ImageType { asset, network }
 
 enum ParentAction { someoneElseIsComing, pickUpOnCar, pickUpInside }
+
 enum MainParentAction { mother, father, familyMember }
 
 enum DispatcherAction {
@@ -15,7 +16,7 @@ enum ToastType {
   success,
 }
 
-enum UserRole{
+enum UserRole {
   parent,
   dispatcher,
   viewer,
@@ -37,8 +38,8 @@ enum DispatcherMessageType {
   ready,
   collected,
   droppedOff,
-  dispatcherArrivalTime,
   dispatcherDelayTime,
+  additionalDelayTime,
   receptionCalling,
   carUnavailable,
 }

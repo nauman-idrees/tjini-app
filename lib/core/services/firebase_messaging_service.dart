@@ -2,10 +2,13 @@ import 'dart:io';
 
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 import 'package:tjini_app/core/di/locator.dart';
 import 'package:tjini_app/core/enum.dart';
+import 'package:tjini_app/core/global.dart';
 import 'package:tjini_app/core/helper/shared_preferences_helper.dart';
 import 'package:tjini_app/models/notification_model.dart';
+import 'package:tjini_app/provider/dispatcher_provider.dart';
 import 'package:tjini_app/provider/notification_provider.dart';
 
 import '../../models/login_response.dart';
@@ -43,7 +46,6 @@ class FirebaseMessagingService {
   static Future<void> _firebaseMessagingBackgroundHandler(
     RemoteMessage message,
   ) async {
-
     print("Background Message:");
     print(message.data);
 
@@ -53,19 +55,25 @@ class FirebaseMessagingService {
     await NotificationService.showNotification(
       title: title,
       body: body,
-      payload: message.data.map((key, value) => MapEntry(key, value.toString())),
+      payload: message.data.map(
+        (key, value) => MapEntry(key, value.toString()),
+      ),
     );
 
-    LoginResponse? loginResponse = await locator<SharedPreferencesHelper>().getCurrentUser();
-    if(loginResponse != null){
-      if(loginResponse.user!.roles.any((element) => element.name == UserRole.parent,)){
+    LoginResponse? loginResponse = await locator<SharedPreferencesHelper>()
+        .getCurrentUser();
+    if (loginResponse != null) {
+      if (!loginResponse.isUserDespatcherOrViewer) {
         NotificationProvider().getNotification(loginResponse.token!);
+      } else {
+        navigatorKey.currentContext!
+            .read<DispatcherProvider>()
+            .fetchInitialData(isLoading: false);
       }
     }
   }
 
   static Future<void> _onMessageHandler(RemoteMessage message) async {
-
     print("Foreground Message:");
     print(message.data);
 
@@ -75,18 +83,24 @@ class FirebaseMessagingService {
     await NotificationService.showNotification(
       title: title,
       body: body,
-      payload: message.data.map((key, value) => MapEntry(key, value.toString())),
+      payload: message.data.map(
+        (key, value) => MapEntry(key, value.toString()),
+      ),
     );
-    LoginResponse? loginResponse = await locator<SharedPreferencesHelper>().getCurrentUser();
-    if(loginResponse != null){
-      if(loginResponse.user!.roles.any((element) => element.name == UserRole.parent,)){
+    LoginResponse? loginResponse = await locator<SharedPreferencesHelper>()
+        .getCurrentUser();
+    if (loginResponse != null) {
+      if (!loginResponse.isUserDespatcherOrViewer) {
         NotificationProvider().getNotification(loginResponse.token!);
+      } else {
+        navigatorKey.currentContext!
+            .read<DispatcherProvider>()
+            .fetchInitialData(isLoading: false);
       }
     }
   }
 
   static Future<void> _onMessageOpenAppHandler(RemoteMessage message) async {
-
     print("Notification Opened:");
     print(message.data);
 
@@ -96,11 +110,16 @@ class FirebaseMessagingService {
     await NotificationService.showNotification(
       title: title,
       body: body,
-      payload: message.data.map((key, value) => MapEntry(key, value.toString())),
+      payload: message.data.map(
+        (key, value) => MapEntry(key, value.toString()),
+      ),
     );
-    LoginResponse? loginResponse = await locator<SharedPreferencesHelper>().getCurrentUser();
-    if(loginResponse != null){
-      if(loginResponse.user!.roles.any((element) => element.name == UserRole.parent,)){
+    LoginResponse? loginResponse = await locator<SharedPreferencesHelper>()
+        .getCurrentUser();
+    if (loginResponse != null) {
+      if (loginResponse.user!.roles.any(
+        (element) => element.name == UserRole.parent,
+      )) {
         NotificationProvider().getNotification(loginResponse.token!);
       }
     }

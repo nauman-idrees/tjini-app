@@ -1,22 +1,44 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
+import 'package:flutter/scheduler.dart';
+import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:tjini_app/core/enum.dart';
 import 'package:tjini_app/core/extensions.dart';
+import 'package:tjini_app/models/dispatchee_model.dart';
 import 'package:tjini_app/ui/common/circle_container.dart';
 import 'package:tjini_app/ui/common/header_widget.dart';
 import 'package:tjini_app/ui/common/image_widget.dart';
 import 'package:tjini_app/ui/common/text_widget.dart';
 import 'package:tjini_app/ui/resources/app_colors.dart';
+import '../../provider/dispatcher_provider.dart';
 import '../../provider/user_provider.dart';
 import 'child_detail_screen.dart';
 
-class EstablishmentProfileScreen extends StatelessWidget {
-  const EstablishmentProfileScreen({super.key});
+class EstablishmentProfileScreen extends HookWidget {
+  EstablishmentProfileScreen({super.key});
+
+  Timer? _timer;
 
   @override
   Widget build(BuildContext context) {
     final user = context.read<UserProvider>().getUser();
+    final despatcherProvider = context.watch<DispatcherProvider>();
+    useEffect(() {
+      SchedulerBinding.instance.addPostFrameCallback((_) {
+        despatcherProvider.fetchInitialData();
+      });
+      if (_timer == null || _timer?.isActive == false) {
+        _timer = Timer.periodic(Duration(seconds: 30), (timer) {
+          despatcherProvider.fetchInitialData(isLoading: false);
+        });
+      }
+      return () {
+        _timer?.cancel();
+      };
+    }, []);
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -95,33 +117,48 @@ class EstablishmentProfileScreen extends StatelessWidget {
                   // ),
                 ],
               ),
-              SizedBox(
-                height: MediaQuery.sizeOf(context).height * 0.67,
-                child: Scrollbar(
-                  thumbVisibility: true,
-                  trackVisibility: true,
-                  radius: Radius.circular(20),
-                  child: ListView.builder(
-                    padding: EdgeInsets.all(10),
-                    itemBuilder: (_, index) {
-                      final parent = mockParents[index];
-                      return ParentListingTile(
-                          parent: parent,
-                        onTap: () {
-                            if(user!.roles.any(
+              despatcherProvider.isLoading
+                  ? Center(
+                      child: Padding(
+                        padding: const EdgeInsets.only(top: 200.0),
+                        child: CircularProgressIndicator(),
+                      ),
+                    )
+                  : despatcherProvider.dispatchees.isEmpty
+                  ? Text("No child to prepare yet")
+                  : SizedBox(
+                      height: MediaQuery.sizeOf(context).height * 0.67,
+                      child: Scrollbar(
+                        thumbVisibility: true,
+                        trackVisibility: true,
+                        radius: Radius.circular(20),
+                        child: ListView.builder(
+                          padding: EdgeInsets.all(10),
+                          itemBuilder: (_, index) {
+                            final dispatchee = despatcherProvider.dispatchees;
+                            return DispatcheeListingTile(
+                              despatchee: dispatchee[index],
+                              onTap: () {
+                                if (user!.roles.any(
                                   (role) => role.name == UserRole.dispatcher,
-                            )) {
-                              Navigator.push(context, MaterialPageRoute(
-                                builder: (context) => ChildDetailScreen(),),);
-                            }
-                        },
-                      );
-                    },
+                                )) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (context) => ChildDetailScreen(
+                                        dispatcheeId: dispatchee[index].id,
+                                      ),
+                                    ),
+                                  );
+                                }
+                              },
+                            );
+                          },
 
-                    itemCount: mockParents.length,
-                  ),
-                ),
-              ),
+                          itemCount: despatcherProvider.dispatchees.length,
+                        ),
+                      ),
+                    ),
               //Gap(30),
               // MainButton(
               //   title: 'Parent de notification'.hardcoded(),
@@ -151,20 +188,21 @@ class EstablishmentProfileScreen extends StatelessWidget {
   }
 }
 
-class ParentListingTile extends StatelessWidget {
-  const ParentListingTile({
+class DispatcheeListingTile extends StatelessWidget {
+  const DispatcheeListingTile({
     super.key,
-    required this.parent,
+    required this.despatchee,
     this.onTap,
   });
 
-  final Parent parent;
+  final DispatcheeModel despatchee;
   final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
+    int timeInMin = _getRemainingTimeInMin(despatchee);
     return GestureDetector(
-      onTap: onTap ?? (){},
+      onTap: onTap ?? () {},
       child: Column(
         children: [
           Stack(
@@ -183,7 +221,6 @@ class ParentListingTile extends StatelessWidget {
                       Material(
                         elevation: 5,
                         shape: const CircleBorder(),
-      
                         child: CircleContainer(
                           width: 30,
                           height: 30,
@@ -199,7 +236,10 @@ class ParentListingTile extends StatelessWidget {
                       ),
                       Gap(5),
                       TextWidget(
-                        title: parent.name,
+                        title:
+                            despatchee.user.firstName +
+                            " " +
+                            despatchee.user.lastName,
                         size: 14,
                         weight: FontWeight.w600,
                         color: Colors.black,
@@ -220,7 +260,7 @@ class ParentListingTile extends StatelessWidget {
                             height: double.infinity,
                             decoration: BoxDecoration(
                               shape: BoxShape.circle,
-                              color: status == parent.status
+                              color: status.name == despatchee.status
                                   ? AppColors.green
                                   : null,
                             ),
@@ -238,10 +278,10 @@ class ParentListingTile extends StatelessWidget {
                   height: 55,
                   width: 55,
                   borderWidth: 3,
-                  borderColor: getColor(parent.time),
+                  borderColor: getColor(timeInMin),
                   child: Center(
                     child: TextWidget(
-                      title: "${parent.time}\nmin",
+                      title: "${timeInMin}\nmin",
                       align: TextAlign.center,
                       size: 14,
                       weight: FontWeight.w600,
@@ -274,14 +314,21 @@ class ParentListingTile extends StatelessWidget {
     );
   }
 
-  getColor(String time) {
-    if (time == "5") {
+  getColor(int time) {
+    if (time > 15) {
       return AppColors.green;
-    } else if (time == "10") {
+    } else if (time >= 5 && time <= 15) {
       return Colors.yellow;
-    } else if (time == "15") {
+    } else if (time < 5) {
       return Colors.red;
     }
+  }
+
+  int _getRemainingTimeInMin(DispatcheeModel despatchee) {
+    final start = DateTime.parse(despatchee.createdAt);
+    final now = DateTime.now();
+    final difference = now.difference(start).inMinutes;
+    return despatchee.time - difference;
   }
 }
 
@@ -308,7 +355,7 @@ final List<Parent> mockParents = List.generate(10, (index) {
 });
 
 enum ParentStatus {
-  ongoing,
+  preparing,
   ready,
   collected,
 }
@@ -316,7 +363,7 @@ enum ParentStatus {
 extension ParentStatusExtension on ParentStatus {
   String title() {
     return switch (this) {
-      ParentStatus.ongoing => "En court".hardcoded(),
+      ParentStatus.preparing => "En court".hardcoded(),
       ParentStatus.ready => "PRÊT".hardcoded(),
       ParentStatus.collected => "Collecté".hardcoded(),
     };

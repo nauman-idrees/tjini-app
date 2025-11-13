@@ -1,6 +1,8 @@
 import 'dart:async';
 import 'package:dio/dio.dart';
 import 'package:pretty_dio_logger/pretty_dio_logger.dart';
+import 'package:tjini_app/core/di/locator.dart';
+import 'package:tjini_app/core/helper/shared_preferences_helper.dart';
 import 'package:tjini_app/models/cutom_exception.dart';
 import 'api_endpoints.dart';
 
@@ -29,12 +31,12 @@ class ApiService {
     _dio.interceptors.add(
       InterceptorsWrapper(
         onRequest: (options, handler) async {
-          // String? accessToken =
-          //     locator<SharedPreferencesHelper>().getAccessToken();
-          // if (accessToken != null) {
-          //   options.headers['Authorization'] =
-          //       'Bearer ${locator<SharedPreferencesHelper>().getAccessToken()}';
-          // }
+          String? accessToken = locator<SharedPreferencesHelper>()
+              .getCurrentUser()
+              ?.token;
+          if (accessToken != null) {
+            options.headers['Authorization'] = 'Bearer ${accessToken}';
+          }
           return handler.next(options); //continue
         },
         onResponse: (response, handler) {
@@ -138,10 +140,10 @@ class ApiService {
   }
 
   Future<Response> sendNotification(
-      String endpoint,
-      Map<String, dynamic> data,
-      String token,
-      ) async {
+    String endpoint,
+    Map<String, dynamic> data,
+    String token,
+  ) async {
     try {
       final response = await _dio.post(
         endpoint,
@@ -162,9 +164,9 @@ class ApiService {
   }
 
   Future<Response> getNotification(
-      String endpoint,
-      String token,
-      ) async {
+    String endpoint,
+    String token,
+  ) async {
     try {
       final response = await _dio.get(
         endpoint,
@@ -182,6 +184,4 @@ class ApiService {
       rethrow;
     }
   }
-
-
 }

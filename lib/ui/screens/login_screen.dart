@@ -24,7 +24,9 @@ class LoginScreen extends HookWidget {
 
   @override
   Widget build(BuildContext context) {
-    final emailController = useTextEditingController(text: "john@doe.com");
+    final emailController = useTextEditingController(
+      text: "dispatcher@css.com",
+    );
     final passwordController = useTextEditingController(text: "Password@1234");
     return Scaffold(
       body: SafeArea(

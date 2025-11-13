@@ -1,5 +1,6 @@
 import 'dart:convert';
 
+import 'package:flutter/foundation.dart';
 import 'package:tjini_app/core/enum.dart';
 
 class LoginResponse {
@@ -242,4 +243,15 @@ UserRole _parseUserRole(Object? value) {
   }
   // Fallback: pick a sensible default or throw. Using 'viewer' as safe default.
   return UserRole.viewer;
+}
+
+extension LoginResponseExtension on LoginResponse {
+  String? get token => this.token;
+  bool get isUserDespatcherOrViewer {
+    return user?.roles.any(
+          (role) =>
+              role.name == UserRole.dispatcher || role.name == UserRole.viewer,
+        ) ??
+        false;
+  }
 }

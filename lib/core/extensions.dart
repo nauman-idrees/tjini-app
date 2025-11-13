@@ -99,11 +99,10 @@ extension ValidateFields on String? {
   }
 }
 
-
 extension ParentMessageTypeMessageExtension on ParentMessageType {
   String get message {
     switch (this) {
-    // ---- Parent Side ----
+      // ---- Parent Side ----
       case ParentMessageType.whoComing:
         return "Mother is coming";
       case ParentMessageType.delayTime:
@@ -123,7 +122,7 @@ extension ParentMessageTypeMessageExtension on ParentMessageType {
 extension MessageTypeCodeExtension on DispatcherMessageType {
   String get code {
     switch (this) {
-    // ---- Dispatcher Side ----
+      // ---- Dispatcher Side ----
       case DispatcherMessageType.preparing:
         return "preparing";
       case DispatcherMessageType.ready:
@@ -132,14 +131,36 @@ extension MessageTypeCodeExtension on DispatcherMessageType {
         return "collected";
       case DispatcherMessageType.droppedOff:
         return "dropped-off";
-      case DispatcherMessageType.dispatcherArrivalTime:
-        return "arrival-time";
+      case DispatcherMessageType.additionalDelayTime:
+        return "additional-delay";
       case DispatcherMessageType.dispatcherDelayTime:
         return "delay-time";
       case DispatcherMessageType.receptionCalling:
         return "reception-calling";
       case DispatcherMessageType.carUnavailable:
         return "car-unavailable";
+    }
+  }
+
+  String get message {
+    switch (this) {
+      // ---- Dispatcher Side ----
+      case DispatcherMessageType.preparing:
+        return "Your child is being prepared for pickup.";
+      case DispatcherMessageType.ready:
+        return "Your child is ready for pickup.";
+      case DispatcherMessageType.collected:
+        return "Your child has been collected.";
+      case DispatcherMessageType.droppedOff:
+        return "Your child has been dropped off.";
+      case DispatcherMessageType.additionalDelayTime:
+        return "The dispatcher is experiencing an additional delay.";
+      case DispatcherMessageType.dispatcherDelayTime:
+        return "The dispatcher is experiencing a delay of (duration-value) minutes.";
+      case DispatcherMessageType.receptionCalling:
+        return "The reception is trying to reach you.";
+      case DispatcherMessageType.carUnavailable:
+        return "Pickup by car is currently unavailable.";
     }
   }
 }

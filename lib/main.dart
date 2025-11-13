@@ -3,6 +3,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart' show SystemChrome, SystemUiOverlayStyle;
 import 'package:provider/provider.dart';
 import 'package:tjini_app/core/di/locator.dart';
+import 'package:tjini_app/core/global.dart';
 import 'package:tjini_app/core/services/firebase_messaging_service.dart';
 import 'package:tjini_app/firebase_options.dart';
 import 'package:tjini_app/provider/auth_provider.dart';
@@ -48,7 +49,9 @@ class TjiniApp extends StatelessWidget {
           create: (_) => UserProvider(),
         ),
         ChangeNotifierProvider(
-          create: (_) => DispatcherProvider(),
+          create: (_) => DispatcherProvider(
+            remoteRepository: locator<IRemoteRepository>(),
+          ),
         ),
         ChangeNotifierProvider(
           create: (_) => AverageTimeProvider(),
@@ -63,6 +66,7 @@ class TjiniApp extends StatelessWidget {
       child: GestureDetector(
         onTap: () => FocusManager.instance.primaryFocus?.unfocus(),
         child: MaterialApp(
+          navigatorKey: navigatorKey,
           theme: AppTheme.theme,
           debugShowCheckedModeBanner: false,
           initialRoute: AppRoutes.initialRoute,

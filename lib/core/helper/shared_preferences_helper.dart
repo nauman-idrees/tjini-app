@@ -26,7 +26,7 @@ class SharedPreferencesHelper {
     _prefs.setString(_keyUserId, userId);
   }
 
-   void saveIsLoggedIn(bool value) {
+  void saveIsLoggedIn(bool value) {
     _prefs.setBool(_isLoggedIn, value);
   }
 
@@ -38,7 +38,7 @@ class SharedPreferencesHelper {
     await _prefs.setString(_keyCurrentUser, jsonEncode(user.toJson()));
   }
 
-  Future<LoginResponse?> getCurrentUser() async {
+  LoginResponse? getCurrentUser() {
     final jsonString = _prefs.getString(_keyCurrentUser);
     if (jsonString != null) {
       final Map<String, dynamic> jsonMap = jsonDecode(jsonString);
@@ -47,52 +47,52 @@ class SharedPreferencesHelper {
     return null;
   }
 
- //  Future<void> addNotification(NotificationModels notification) async {
- //    final existing = getNotificationList();
- //
- //    existing.add(notification);
- //    await _prefs.setString(
- //      _keyNotificationList,
- //      NotificationModels.listToJson(existing),
- //    );
- //  }
- //
- // List<NotificationModels> getNotificationList()  {
- //    final jsonString = _prefs.getString(_keyNotificationList);
- //    if (jsonString == null) return [];
- //    return NotificationModels.listFromJson(jsonString);
- //  }
- //
- //  Future<void> deleteOldNotifications() async {
- //    final list = getNotificationList();
- //    final now = DateTime.now();
- //
- //    final filtered = list.where((n) {
- //      final diff = now.difference(n.dateTime);
- //      return diff.inHours < 2;
- //    }).toList();
- //
- //    await _prefs.setString(
- //      _keyNotificationList,
- //      NotificationModels.listToJson(filtered),
- //    );
- //  }
- //
- //  NotificationModels? getLatestNotification()  {
- //     deleteOldNotifications();
- //
- //    final list =  getNotificationList();
- //    if (list.isEmpty) return null;
- //
- //    list.sort((a, b) => b.dateTime.compareTo(a.dateTime));
- //    return list.first;
- //  }
+  //  Future<void> addNotification(NotificationModels notification) async {
+  //    final existing = getNotificationList();
+  //
+  //    existing.add(notification);
+  //    await _prefs.setString(
+  //      _keyNotificationList,
+  //      NotificationModels.listToJson(existing),
+  //    );
+  //  }
+  //
+  // List<NotificationModels> getNotificationList()  {
+  //    final jsonString = _prefs.getString(_keyNotificationList);
+  //    if (jsonString == null) return [];
+  //    return NotificationModels.listFromJson(jsonString);
+  //  }
+  //
+  //  Future<void> deleteOldNotifications() async {
+  //    final list = getNotificationList();
+  //    final now = DateTime.now();
+  //
+  //    final filtered = list.where((n) {
+  //      final diff = now.difference(n.dateTime);
+  //      return diff.inHours < 2;
+  //    }).toList();
+  //
+  //    await _prefs.setString(
+  //      _keyNotificationList,
+  //      NotificationModels.listToJson(filtered),
+  //    );
+  //  }
+  //
+  //  NotificationModels? getLatestNotification()  {
+  //     deleteOldNotifications();
+  //
+  //    final list =  getNotificationList();
+  //    if (list.isEmpty) return null;
+  //
+  //    list.sort((a, b) => b.dateTime.compareTo(a.dateTime));
+  //    return list.first;
+  //  }
 
   bool isLoggedIn() {
     return _prefs.getBool(_isLoggedIn) ?? false;
   }
 
-// Retrieve methods
+  // Retrieve methods
   String? getAccessToken() {
     return _prefs.getString(_keyAccessToken);
   }
@@ -105,7 +105,7 @@ class SharedPreferencesHelper {
     return _prefs.getString(_keyFcmToken);
   }
 
-// Clear all saved data
+  // Clear all saved data
   void clearAll() {
     _prefs.clear();
   }
@@ -117,7 +117,7 @@ class SharedPreferencesHelper {
     }
   }
 
-  Future<void> saveIsNextStep(bool value) async{
+  Future<void> saveIsNextStep(bool value) async {
     await _prefs.setBool(_keyNextSep, value);
   }
 

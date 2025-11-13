@@ -20,13 +20,14 @@ import '../common/round_action.dart';
 import '../common/selection_item.dart';
 
 bool isChangingTime = false;
+
 class ParentProfileScreen extends StatelessWidget {
   const ParentProfileScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
     final user = context.read<UserProvider>().getUser();
-    final avgProvider  = Provider.of<AverageTimeProvider>(context);
+    final avgProvider = Provider.of<AverageTimeProvider>(context);
     final parentProvider = Provider.of<ParentProvider>(context);
     final notificationProvider = Provider.of<NotificationProvider>(context);
     return Scaffold(
@@ -89,7 +90,7 @@ class ParentProfileScreen extends StatelessWidget {
                           onTap: () {
                             isChangingTime = true;
                             avgProvider.increment();
-                            },
+                          },
                           icon: Icons.add,
                         ),
                       ),
@@ -99,7 +100,7 @@ class ParentProfileScreen extends StatelessWidget {
                           onTap: () {
                             isChangingTime = true;
                             avgProvider.decrement();
-                            },
+                          },
                           icon: Icons.remove,
                         ),
                       ),
@@ -140,27 +141,35 @@ class ParentProfileScreen extends StatelessWidget {
                       TextWidget(title: "Nom de l'école"),
                     ],
                   ),
-                  !notificationProvider.latestNotification.any((element) => element.type! == "ready-to-go",)
-                  && !notificationProvider.latestNotification.any((element) => element.type! == "arrived",)
+                  !notificationProvider.latestNotification.any(
+                            (element) => element.type! == "ready-to-go",
+                          ) &&
+                          !notificationProvider.latestNotification.any(
+                            (element) => element.type! == "arrived",
+                          )
                       ? SizedBox(
-                    width: MediaQuery.sizeOf(context).width / 1.8,
-                    child: MainButton(
-                      title: 'En court de préparation'.hardcoded(),
-                      onPressed: () async{
-                        LoginResponse? currentUser = await locator<SharedPreferencesHelper>().getCurrentUser();
-                        if(currentUser != null) {
-                          await notificationProvider.sendParentNotification(
-                              "ready-to-go",
-                              "Ready To Go",
-                              currentUser.user!.id,
-                              currentUser.token!
-                          );
-                        }
-                      },
-                      textColor: Colors.black,
-                      buttonColor: AppColors.grey,
-                    ),
-                  ) : SizedBox(),
+                          width: MediaQuery.sizeOf(context).width / 1.8,
+                          child: MainButton(
+                            title: 'En court de préparation'.hardcoded(),
+                            onPressed: () async {
+                              LoginResponse? currentUser =
+                                  await locator<SharedPreferencesHelper>()
+                                      .getCurrentUser();
+                              if (currentUser != null) {
+                                await notificationProvider
+                                    .sendParentNotification(
+                                      "ready-to-go",
+                                      "Ready To Go",
+                                      currentUser.user!.id,
+                                      currentUser.token!,
+                                    );
+                              }
+                            },
+                            textColor: Colors.black,
+                            buttonColor: AppColors.grey,
+                          ),
+                        )
+                      : SizedBox(),
                 ],
               ),
               const Gap(30),
@@ -168,49 +177,59 @@ class ParentProfileScreen extends StatelessWidget {
                 width: MediaQuery.sizeOf(context).width / 1.4,
                 child: MainButton(
                   title: 'Notification Etablissement'.hardcoded(),
-                  onPressed: () async{
-                    LoginResponse? currentUser = await locator<SharedPreferencesHelper>().getCurrentUser();
-                    if(currentUser != null) {
+                  onPressed: () async {
+                    LoginResponse? currentUser =
+                        await locator<SharedPreferencesHelper>()
+                            .getCurrentUser();
+                    if (currentUser != null) {
                       if (parentProvider.selectedMainAction != null) {
                         await notificationProvider.sendParentNotification(
-                            "who-coming",
-                            "${parentProvider.selectedMainAction!.name} is coming",
-                            currentUser.user!.id,
-                            currentUser.token!
+                          "who-coming",
+                          "${parentProvider.selectedMainAction!.name} is coming",
+                          currentUser.user!.id,
+                          currentUser.token!,
                         );
                         parentProvider.clearSelection();
                       }
 
                       if (parentProvider.selectedAction != null) {
                         await notificationProvider.sendParentNotification(
-                            parentProvider.selectedAction == ParentAction.pickUpInside
-                                ? "inside-pickup" : parentProvider.selectedAction == ParentAction.pickUpOnCar
-                                ? "car-pickup" : "someone-else-coming",
-                            parentProvider.selectedAction == ParentAction.pickUpInside
-                                ? "Pickup inside"
-                                : parentProvider.selectedAction == ParentAction.pickUpOnCar
-                                ?  "Pickup by car"
-                            : "Someone else is coming.",
-                            currentUser.user!.id,
-                            currentUser.token!
+                          parentProvider.selectedAction ==
+                                  ParentAction.pickUpInside
+                              ? "inside-pickup"
+                              : parentProvider.selectedAction ==
+                                    ParentAction.pickUpOnCar
+                              ? "car-pickup"
+                              : "someone-else-coming",
+                          parentProvider.selectedAction ==
+                                  ParentAction.pickUpInside
+                              ? "Pickup inside"
+                              : parentProvider.selectedAction ==
+                                    ParentAction.pickUpOnCar
+                              ? "Pickup by car"
+                              : "Someone else is coming.",
+                          currentUser.user!.id,
+                          currentUser.token!,
                         );
                         parentProvider.clearSelection();
                       }
 
-                      if(isChangingTime){
-                        if(!notificationProvider.latestNotification.any((element) => element.type! == "arrival-time",)){
+                      if (isChangingTime) {
+                        if (!notificationProvider.latestNotification.any(
+                          (element) => element.type! == "arrival-time",
+                        )) {
                           await notificationProvider.sendParentNotification(
-                              "arrival-time",
-                              "I will arrive in ${avgProvider.time} min.",
-                              currentUser.user!.id,
-                              currentUser.token!
+                            "arrival-time",
+                            "I will arrive in ${avgProvider.time} min.",
+                            currentUser.user!.id,
+                            currentUser.token!,
                           );
-                        }else{
+                        } else {
                           await notificationProvider.sendParentNotification(
-                              "delay-time",
-                              "I will be late for ${avgProvider.time} min.",
-                              currentUser.user!.id,
-                              currentUser.token!
+                            "delay-time",
+                            "I will be late for ${avgProvider.time} min.",
+                            currentUser.user!.id,
+                            currentUser.token!,
                           );
                         }
                         avgProvider.reset();
@@ -223,49 +242,53 @@ class ParentProfileScreen extends StatelessWidget {
                 ),
               ),
               const Gap(30),
-              !notificationProvider.latestNotification.any((element) => element.type! == "who-coming",)
+              !notificationProvider.latestNotification.any(
+                    (element) => element.type! == "who-coming",
+                  )
                   ? Column(
-                children: [
-                  ...MainParentAction.values.map((status) {
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 20),
-                      child: SelectionItem(
-                        title: status.title(),
-                        isSelected: parentProvider.isMainSelected(status),
-                        onTap: () {
-                          parentProvider.toggleMainSelection(status);
-                        },
-                      ),
-                    );
-                  }),
-                ],
-              ) : Column(
-                children: [
-                  ...ParentAction.values.map((status) {
-                    return Padding(
-                      padding: const EdgeInsets.only(left: 20),
-                      child: SelectionItem(
-                        title: status.title(),
-                        isSelected: parentProvider.isSelected(status),
-                        onTap: () {
-                          parentProvider.toggleSelection(status);
-                        },
-                      ),
-                    );
-                  }),
-                ],
-              ),
+                      children: [
+                        ...MainParentAction.values.map((status) {
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 20),
+                            child: SelectionItem(
+                              title: status.title(),
+                              isSelected: parentProvider.isMainSelected(status),
+                              onTap: () {
+                                parentProvider.toggleMainSelection(status);
+                              },
+                            ),
+                          );
+                        }),
+                      ],
+                    )
+                  : Column(
+                      children: [
+                        ...ParentAction.values.map((status) {
+                          return Padding(
+                            padding: const EdgeInsets.only(left: 20),
+                            child: SelectionItem(
+                              title: status.title(),
+                              isSelected: parentProvider.isSelected(status),
+                              onTap: () {
+                                parentProvider.toggleSelection(status);
+                              },
+                            ),
+                          );
+                        }),
+                      ],
+                    ),
               const Spacer(),
               MainButton(
                 title: 'Je suis là'.hardcoded(),
-                onPressed: () async{
-                  LoginResponse? currentUser = await locator<SharedPreferencesHelper>().getCurrentUser();
-                  if(currentUser != null) {
+                onPressed: () async {
+                  LoginResponse? currentUser =
+                      await locator<SharedPreferencesHelper>().getCurrentUser();
+                  if (currentUser != null) {
                     await notificationProvider.sendParentNotification(
-                        "arrived",
-                        "I'm here",
-                        currentUser.user!.id,
-                        currentUser.token!
+                      "arrived",
+                      "I'm here",
+                      currentUser.user!.id,
+                      currentUser.token!,
                     );
                   }
                 },
@@ -274,6 +297,16 @@ class ParentProfileScreen extends StatelessWidget {
               ),
             ],
           ),
+        ),
+      ),
+      bottomSheet: IconButton(
+        onPressed: () {
+          locator<SharedPreferencesHelper>().clearAll();
+        },
+        icon: Icon(
+          Icons.logout,
+          color: Colors.red,
+          size: 30,
         ),
       ),
     );

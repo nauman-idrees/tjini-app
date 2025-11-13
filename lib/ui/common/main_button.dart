@@ -21,12 +21,12 @@ class MainButton extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return AnimatedOpacity(
-      opacity: isDisabled ? 0.2 : 1,
+      opacity: isDisabled ? 0.3 : 1,
       duration: const Duration(milliseconds: 200),
       child: SizedBox(
         width: double.infinity,
         child: FilledButton(
-          onPressed: isDisabled ? null : onPressed,
+          onPressed: isDisabled ? () {} : onPressed,
           style: ButtonStyle(
             backgroundColor: buttonColor != null
                 ? WidgetStateProperty.all(buttonColor)

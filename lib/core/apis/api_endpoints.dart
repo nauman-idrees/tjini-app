@@ -5,4 +5,5 @@ class ApiEndpoints {
   static const String resetPassword = 'forgot-password';
   static const String notify = 'notify/users';
   static const String notification = 'notifications';
+  static const String dispatcheeList = 'dispatchee/list';
 }

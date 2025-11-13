@@ -31,7 +31,7 @@ class AppRoutes {
         return MaterialPageRoute(builder: (_) => ParentProfileScreen());
       case establishmentProfileRoute:
         return MaterialPageRoute(
-          builder: (_) => const EstablishmentProfileScreen(),
+          builder: (_) => EstablishmentProfileScreen(),
         );
       case viewerProfileRoute:
         return MaterialPageRoute(builder: (_) => const ViewerScreen());
