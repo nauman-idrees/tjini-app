@@ -7,6 +7,8 @@ import 'package:tjini_app/core/utils/toast_utils.dart';
 import 'package:tjini_app/models/login_response.dart';
 import 'package:tjini_app/repositories/remote/iremote_repository.dart';
 
+import '../models/user.dart';
+
 class AuthProvider extends ChangeNotifier {
   final IRemoteRepository _remoteRepository;
 
@@ -14,6 +16,7 @@ class AuthProvider extends ChangeNotifier {
     : _remoteRepository = remoteRepository;
 
   bool isLoading = false;
+  bool isLoggingOut = false;
 
   Future<void> login({
     required String email,
@@ -73,6 +76,25 @@ class AuthProvider extends ChangeNotifier {
         ToastUtils.show(msg: error.message, type: ToastType.error);
         isLoading = false;
         notifyListeners();
+      },
+    );
+  }
+
+  Future<void> logout({required VoidCallback onSucces}) async {
+    isLoggingOut = true;
+    notifyListeners();
+    final result = await _remoteRepository.logout();
+    result.when(
+      (success) {
+        isLoggingOut = false;
+        notifyListeners();
+        locator<SharedPreferencesHelper>().clearAll();
+        onSucces();
+      },
+      (err) {
+        isLoggingOut = false;
+        notifyListeners();
+        ToastUtils.show(msg: err.message, type: ToastType.error);
       },
     );
   }

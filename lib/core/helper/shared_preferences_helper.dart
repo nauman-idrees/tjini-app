@@ -107,7 +107,10 @@ class SharedPreferencesHelper {
 
   // Clear all saved data
   void clearAll() {
-    _prefs.clear();
+    _prefs.remove(_keyAccessToken);
+    _prefs.remove(_keyUserId);
+    _prefs.remove(_isLoggedIn);
+    _prefs.remove(_keyCurrentUser);
   }
 
   void logAll() {

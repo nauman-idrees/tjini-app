@@ -57,7 +57,9 @@ class TjiniApp extends StatelessWidget {
           create: (_) => AverageTimeProvider(),
         ),
         ChangeNotifierProvider(
-          create: (_) => ParentProvider(),
+          create: (_) => ParentProvider(
+            remoteRepository: locator<IRemoteRepository>(),
+          ),
         ),
         ChangeNotifierProvider(
           create: (_) => NotificationProvider(),

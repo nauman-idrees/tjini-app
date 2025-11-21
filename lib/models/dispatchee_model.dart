@@ -1,3 +1,5 @@
+import 'user.dart';
+
 class DispatcheeModel {
   final int id;
   final int userId;
@@ -46,58 +48,6 @@ class DispatcheeModel {
       'created_at': createdAt,
       'updated_at': updatedAt,
       'user': user.toJson(),
-    };
-  }
-}
-
-class User {
-  final int id;
-  final String firstName;
-  final String lastName;
-  final String email;
-  final int schoolId;
-  final int isPrimary;
-  final int? primaryParentId;
-  final String relation;
-  final String childName;
-
-  User({
-    required this.id,
-    required this.firstName,
-    required this.lastName,
-    required this.email,
-    required this.schoolId,
-    required this.isPrimary,
-    this.primaryParentId,
-    required this.relation,
-    required this.childName,
-  });
-
-  factory User.fromJson(Map<String, dynamic> json) {
-    return User(
-      id: json['id'],
-      firstName: json['first_name'],
-      lastName: json['last_name'],
-      email: json['email'],
-      schoolId: json['school_id'],
-      isPrimary: json['is_primary'],
-      primaryParentId: json['primary_parent_id'],
-      relation: json['relation'],
-      childName: json['child_name'],
-    );
-  }
-
-  Map<String, dynamic> toJson() {
-    return {
-      'id': id,
-      'first_name': firstName,
-      'last_name': lastName,
-      'email': email,
-      'school_id': schoolId,
-      'is_primary': isPrimary,
-      'primary_parent_id': primaryParentId,
-      'relation': relation,
-      'child_name': childName,
     };
   }
 }

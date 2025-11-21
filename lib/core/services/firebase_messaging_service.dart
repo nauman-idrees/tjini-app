@@ -10,6 +10,7 @@ import 'package:tjini_app/core/helper/shared_preferences_helper.dart';
 import 'package:tjini_app/models/notification_model.dart';
 import 'package:tjini_app/provider/dispatcher_provider.dart';
 import 'package:tjini_app/provider/notification_provider.dart';
+import 'package:tjini_app/provider/parent_provider.dart';
 
 import '../../models/login_response.dart';
 import 'notification_service.dart';
@@ -30,7 +31,7 @@ class FirebaseMessagingService {
         _firebaseMessagingBackgroundHandler(initialMessage);
       }
     }
-    Future.delayed(const Duration(seconds: 5), () async {
+    Future.delayed(const Duration(seconds: 2), () async {
       try {
         String? token = await _firebaseMessaging.getToken();
         if (token != null) {
@@ -46,25 +47,25 @@ class FirebaseMessagingService {
   static Future<void> _firebaseMessagingBackgroundHandler(
     RemoteMessage message,
   ) async {
-    print("Background Message:");
-    print(message.data);
+    // print("Background Message:");
+    // print(message.data);
 
-    String title = message.notification?.title ?? "New Notification";
-    String body = message.notification?.body ?? "You have a new message";
+    // String title = message.notification?.title ?? "New Notification";
+    // String body = message.notification?.body ?? "You have a new message";
 
-    await NotificationService.showNotification(
-      title: title,
-      body: body,
-      payload: message.data.map(
-        (key, value) => MapEntry(key, value.toString()),
-      ),
-    );
+    // await NotificationService.showNotification(
+    //   title: title,
+    //   body: body,
+    //   payload: message.data.map(
+    //     (key, value) => MapEntry(key, value.toString()),
+    //   ),
+    // );
 
-    LoginResponse? loginResponse = await locator<SharedPreferencesHelper>()
+    LoginResponse? loginResponse = locator<SharedPreferencesHelper>()
         .getCurrentUser();
     if (loginResponse != null) {
       if (!loginResponse.isUserDespatcherOrViewer) {
-        NotificationProvider().getNotification(loginResponse.token!);
+        navigatorKey.currentContext!.read<ParentProvider>().fetchInitialData();
       } else {
         navigatorKey.currentContext!
             .read<DispatcherProvider>()
@@ -91,7 +92,7 @@ class FirebaseMessagingService {
         .getCurrentUser();
     if (loginResponse != null) {
       if (!loginResponse.isUserDespatcherOrViewer) {
-        NotificationProvider().getNotification(loginResponse.token!);
+        navigatorKey.currentContext!.read<ParentProvider>().fetchInitialData();
       } else {
         navigatorKey.currentContext!
             .read<DispatcherProvider>()
@@ -104,23 +105,15 @@ class FirebaseMessagingService {
     print("Notification Opened:");
     print(message.data);
 
-    String title = message.notification?.title ?? "Opened Notification";
-    String body = message.notification?.body ?? "App opened from notification";
-
-    await NotificationService.showNotification(
-      title: title,
-      body: body,
-      payload: message.data.map(
-        (key, value) => MapEntry(key, value.toString()),
-      ),
-    );
     LoginResponse? loginResponse = await locator<SharedPreferencesHelper>()
         .getCurrentUser();
     if (loginResponse != null) {
-      if (loginResponse.user!.roles.any(
-        (element) => element.name == UserRole.parent,
-      )) {
-        NotificationProvider().getNotification(loginResponse.token!);
+      if (!loginResponse.isUserDespatcherOrViewer) {
+        navigatorKey.currentContext!.read<ParentProvider>().fetchInitialData();
+      } else {
+        navigatorKey.currentContext!
+            .read<DispatcherProvider>()
+            .fetchInitialData(isLoading: false);
       }
     }
   }

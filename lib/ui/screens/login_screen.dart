@@ -1,3 +1,4 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_hooks/flutter_hooks.dart';
 import 'package:gap/gap.dart';
@@ -25,9 +26,11 @@ class LoginScreen extends HookWidget {
   @override
   Widget build(BuildContext context) {
     final emailController = useTextEditingController(
-      text: "dispatcher@css.com",
+      text: kDebugMode ? "dispatcher@css.com" : null,
     );
-    final passwordController = useTextEditingController(text: "Password@1234");
+    final passwordController = useTextEditingController(
+      text: kDebugMode ? "Password@1234" : null,
+    );
     return Scaffold(
       body: SafeArea(
         child: Padding(
@@ -98,7 +101,7 @@ class LoginScreen extends HookWidget {
                                     if (user.roles.any(
                                       (role) => role.name == UserRole.parent,
                                     )) {
-                                      Navigator.pushNamed(
+                                      Navigator.pushReplacementNamed(
                                         context,
                                         AppRoutes.parentProfileRoute,
                                       );
@@ -106,20 +109,12 @@ class LoginScreen extends HookWidget {
 
                                     if (user.roles.any(
                                       (role) =>
-                                          role.name == UserRole.dispatcher,
+                                          role.name == UserRole.dispatcher ||
+                                          role.name == UserRole.viewer,
                                     )) {
-                                      Navigator.pushNamed(
+                                      Navigator.pushReplacementNamed(
                                         context,
                                         AppRoutes.establishmentProfileRoute,
-                                      );
-                                    }
-
-                                    if (user.roles.any(
-                                      (role) => role.name == UserRole.viewer,
-                                    )) {
-                                      Navigator.pushNamed(
-                                        context,
-                                        AppRoutes.viewerProfileRoute,
                                       );
                                     }
                                   },

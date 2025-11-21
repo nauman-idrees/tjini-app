@@ -1,11 +1,16 @@
+import 'dart:io';
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:tjini_app/core/di/locator.dart';
 import 'package:tjini_app/core/extensions.dart';
+import 'package:tjini_app/core/global.dart';
 import 'package:tjini_app/core/helper/shared_preferences_helper.dart';
+import 'package:tjini_app/core/utils/dialog_utils.dart';
 import 'package:tjini_app/core/utils/toast_utils.dart';
 import 'package:tjini_app/models/dispatchee_model.dart';
 import 'package:tjini_app/models/login_response.dart';
+import 'package:tjini_app/models/user.dart';
 import 'package:tjini_app/repositories/remote/iremote_repository.dart';
 import 'package:tjini_app/ui/screens/child_detail_screen.dart';
 import '../core/enum.dart';
@@ -55,6 +60,19 @@ class DispatcherProvider extends ChangeNotifier {
   }
 
   Future<void> fetchInitialData({bool isLoading = true}) async {
+    LoginResponse? user = locator<SharedPreferencesHelper>().getCurrentUser();
+    if ((user?.user?.isInClosingWindow ?? false) == false &&
+        (user?.user?.isInStartWindow ?? false) == false) {
+      DialogUtils.showInfoDialog(
+        ctx: navigatorKey.currentContext!,
+        desc:
+            "Vous ne pouvez pas aller plus loin. L'année scolaire n'a pas encore commencé."
+                .hardcoded(),
+        onPositiveBtnPressed: () {
+          exit(0);
+        },
+      );
+    }
     if (isLoading) {
       this.isLoading = true;
     }
@@ -90,7 +108,7 @@ class DispatcherProvider extends ChangeNotifier {
     LoginResponse? user = locator<SharedPreferencesHelper>().getCurrentUser();
     switch (action) {
       case DispatcherUIAction.receptionCallingYou:
-        await _remoteRepository.sendParentNotification(
+        await _remoteRepository.sendNotification(
           type: DispatcherMessageType.receptionCalling.code,
           message: DispatcherMessageType.receptionCalling.message,
           toUserId: userId,
@@ -98,7 +116,7 @@ class DispatcherProvider extends ChangeNotifier {
         );
         break;
       case DispatcherUIAction.pickUpNotAvailable:
-        await _remoteRepository.sendParentNotification(
+        await _remoteRepository.sendNotification(
           type: DispatcherMessageType.carUnavailable.code,
           message: DispatcherMessageType.carUnavailable.message,
           toUserId: userId,
@@ -106,7 +124,7 @@ class DispatcherProvider extends ChangeNotifier {
         );
         break;
       case DispatcherUIAction.additionalDelay:
-        await _remoteRepository.sendParentNotification(
+        await _remoteRepository.sendNotification(
           type: DispatcherMessageType.additionalDelayTime.code,
           message: DispatcherMessageType.additionalDelayTime.message,
           toUserId: userId,
@@ -115,39 +133,78 @@ class DispatcherProvider extends ChangeNotifier {
 
         break;
       case DispatcherUIAction.childOngoing:
-        await _remoteRepository.sendParentNotification(
-          type: DispatcherMessageType.preparing.code,
-          message: DispatcherMessageType.preparing.message,
-          toUserId: userId,
-          fromUserId: user!.user!.id,
+        final result = await _remoteRepository.updateDispatcheeStatus(
+          parentId: userId,
+          status: DispatcherMessageType.preparing.code,
         );
-      case DispatcherUIAction.childReady:
-        await _remoteRepository.sendParentNotification(
-          type: DispatcherMessageType.ready.code,
-          message: DispatcherMessageType.ready.message,
-          toUserId: userId,
-          fromUserId: user!.user!.id,
-        );
-      case DispatcherUIAction.childCollected:
-        await _remoteRepository.sendParentNotification(
-          type: DispatcherMessageType.collected.code,
-          message: DispatcherMessageType.collected.message,
-          toUserId: userId,
-          fromUserId: user!.user!.id,
-        );
-      case DispatcherUIAction.delayTimer:
-        if (delayMinutes != null) {
-          await _remoteRepository.sendParentNotification(
-            type: DispatcherMessageType.dispatcherDelayTime.code,
-            message: DispatcherMessageType.dispatcherDelayTime.message
-                .replaceAll("(duration-value)", delayMinutes.toString()),
+        result.when((success) async {
+          await _remoteRepository.sendNotification(
+            type: DispatcherMessageType.preparing.code,
+            message: DispatcherMessageType.preparing.message,
             toUserId: userId,
             fromUserId: user!.user!.id,
           );
+        }, (err) {});
+
+      case DispatcherUIAction.childReady:
+        final result = await _remoteRepository.updateDispatcheeStatus(
+          parentId: userId,
+          status: DispatcherMessageType.ready.code,
+        );
+        result.when((success) async {
+          await _remoteRepository.sendNotification(
+            type: DispatcherMessageType.ready.code,
+            message: DispatcherMessageType.ready.message,
+            toUserId: userId,
+            fromUserId: user!.user!.id,
+          );
+        }, (err) {});
+
+      case DispatcherUIAction.childCollected:
+        final result = await _remoteRepository.updateDispatcheeStatus(
+          parentId: userId,
+          status: DispatcherMessageType.collected.code,
+        );
+        result.when((success) async {
+          await _remoteRepository.sendNotification(
+            type: DispatcherMessageType.collected.code,
+            message: DispatcherMessageType.collected.message,
+            toUserId: userId,
+            fromUserId: user!.user!.id,
+          );
+        }, (err) {});
+      case DispatcherUIAction.dropped:
+        final result = await _remoteRepository.updateDispatcheeStatus(
+          parentId: userId,
+          status: DispatcherMessageType.dropped.code,
+        );
+        result.when((success) async {
+          await _remoteRepository.sendNotification(
+            type: DispatcherMessageType.dropped.code,
+            message: DispatcherMessageType.dropped.message,
+            toUserId: userId,
+            fromUserId: user!.user!.id,
+          );
+        }, (err) {});
+      case DispatcherUIAction.delayTimer:
+        if (delayMinutes != null) {
+          final result = await _remoteRepository.updateDispatcheeTime(
+            parentId: userId,
+            time: delayMinutes,
+          );
+          result.when((success) async {
+            await _remoteRepository.sendNotification(
+              type: DispatcherMessageType.dispatcherDelayTime.code,
+              message: DispatcherMessageType.dispatcherDelayTime.message
+                  .replaceAll("(duration-value)", delayMinutes.toString()),
+              toUserId: userId,
+              fromUserId: user!.user!.id,
+            );
+          }, (erro) {});
         }
         break;
       case DispatcherUIAction.pickUpOnCar:
-        await _remoteRepository.sendParentNotification(
+        await _remoteRepository.sendNotification(
           type: DispatcherMessageType.collected.code,
           message: DispatcherMessageType.collected.message,
           toUserId: userId,
@@ -155,7 +212,7 @@ class DispatcherProvider extends ChangeNotifier {
         );
     }
     ToastUtils.show(
-      msg: "Parent notified successfully".hardcoded(),
+      msg: "Parent averti avec succès".hardcoded(),
       type: ToastType.success,
     );
     fetchInitialData(isLoading: false);

@@ -1,10 +1,16 @@
 import 'dart:convert';
 
-List<NotificationModels> notificationModelsFromMap(String str) => List<NotificationModels>.from(json.decode(str).map((x) => NotificationModels.fromMap(x)));
+import 'user.dart';
 
-String notificationModelsToMap(List<NotificationModels> data) => json.encode(List<dynamic>.from(data.map((x) => x.toMap())));
+List<NotificationItem> notificationModelsFromMap(String str) =>
+    List<NotificationItem>.from(
+      json.decode(str).map((x) => NotificationItem.fromMap(x)),
+    );
 
-class NotificationModels {
+String notificationModelsToMap(List<NotificationItem> data) =>
+    json.encode(List<dynamic>.from(data.map((x) => x.toMap())));
+
+class NotificationItem {
   int? id;
   int? fromUserId;
   String? type;
@@ -15,9 +21,10 @@ class NotificationModels {
   String? senderRole;
   DateTime? createdAt;
   DateTime? updatedAt;
-  FromUser? fromUser;
+  User? fromUser;
+  User? toUser;
 
-  NotificationModels({
+  NotificationItem({
     this.id,
     this.fromUserId,
     this.type,
@@ -29,21 +36,30 @@ class NotificationModels {
     this.createdAt,
     this.updatedAt,
     this.fromUser,
+    this.toUser,
   });
 
-  factory NotificationModels.fromMap(Map<String, dynamic> json) => NotificationModels(
-    id: json["id"],
-    fromUserId: json["from_user_id"],
-    type: json["type"],
-    message: json["message"],
-    value: json["value"],
-    schoolId: json["school_id"],
-    allParents: json["all_parents"],
-    senderRole: json["sender_role"],
-    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
-    updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
-    fromUser: json["from_user"] == null ? null : FromUser.fromMap(json["from_user"]),
-  );
+  factory NotificationItem.fromMap(Map<String, dynamic> json) =>
+      NotificationItem(
+        id: json["id"],
+        fromUserId: json["from_user_id"],
+        type: json["type"],
+        message: json["message"],
+        value: json["value"],
+        schoolId: json["school_id"],
+        allParents: json["all_parents"],
+        senderRole: json["sender_role"],
+        createdAt: json["created_at"] == null
+            ? null
+            : DateTime.parse(json["created_at"]),
+        updatedAt: json["updated_at"] == null
+            ? null
+            : DateTime.parse(json["updated_at"]),
+        fromUser: json["from_user"] == null
+            ? null
+            : User.fromMap(json["from_user"]),
+        toUser: json["to_user"] == null ? null : User.fromMap(json["to_user"]),
+      );
 
   Map<String, dynamic> toMap() => {
     "id": id,
@@ -57,69 +73,9 @@ class NotificationModels {
     "created_at": createdAt?.toIso8601String(),
     "updated_at": updatedAt?.toIso8601String(),
     "from_user": fromUser?.toMap(),
+    "to_user": toUser?.toMap(),
   };
 }
-
-class FromUser {
-  int? id;
-  String? firstName;
-  String? lastName;
-  String? email;
-  dynamic emailVerifiedAt;
-  int? schoolId;
-  int? isPrimary;
-  String? relation;
-  String? childName;
-  String? deviceToken;
-  DateTime? createdAt;
-  DateTime? updatedAt;
-
-  FromUser({
-    this.id,
-    this.firstName,
-    this.lastName,
-    this.email,
-    this.emailVerifiedAt,
-    this.schoolId,
-    this.isPrimary,
-    this.relation,
-    this.childName,
-    this.deviceToken,
-    this.createdAt,
-    this.updatedAt,
-  });
-
-  factory FromUser.fromMap(Map<String, dynamic> json) => FromUser(
-    id: json["id"],
-    firstName: json["first_name"],
-    lastName: json["last_name"],
-    email: json["email"],
-    emailVerifiedAt: json["email_verified_at"],
-    schoolId: json["school_id"],
-    isPrimary: json["is_primary"],
-    relation: json["relation"],
-    childName: json["child_name"],
-    deviceToken: json["device_token"],
-    createdAt: json["created_at"] == null ? null : DateTime.parse(json["created_at"]),
-    updatedAt: json["updated_at"] == null ? null : DateTime.parse(json["updated_at"]),
-  );
-
-  Map<String, dynamic> toMap() => {
-    "id": id,
-    "first_name": firstName,
-    "last_name": lastName,
-    "email": email,
-    "email_verified_at": emailVerifiedAt,
-    "school_id": schoolId,
-    "is_primary": isPrimary,
-    "relation": relation,
-    "child_name": childName,
-    "device_token": deviceToken,
-    "created_at": createdAt?.toIso8601String(),
-    "updated_at": updatedAt?.toIso8601String(),
-  };
-}
-
 
 // import 'dart:convert';
 //

@@ -6,4 +6,8 @@ class ApiEndpoints {
   static const String notify = 'notify/users';
   static const String notification = 'notifications';
   static const String dispatcheeList = 'dispatchee/list';
+  static const String relatedParents = 'parents/related';
+  static const String transferNotifications = 'transfer-notifications';
+  static const String updateDispatchee = 'dispatchee/update';
+  static const String logout = 'logout';
 }

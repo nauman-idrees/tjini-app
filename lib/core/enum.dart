@@ -1,6 +1,6 @@
 enum ImageType { asset, network }
 
-enum ParentAction { someoneElseIsComing, pickUpOnCar, pickUpInside }
+enum ParentAction { pickUpOnCar, pickUpInside }
 
 enum MainParentAction { mother, father, familyMember }
 
@@ -29,7 +29,11 @@ enum ParentMessageType {
   arrivalTime,
   arrived,
   carPickup,
-  insidePickup,
+  pickupInside,
+  schoolEnd,
+  schoolStart,
+  readyToGo,
+  iAmHere,
 }
 
 enum DispatcherMessageType {
@@ -37,7 +41,7 @@ enum DispatcherMessageType {
   preparing,
   ready,
   collected,
-  droppedOff,
+  dropped,
   dispatcherDelayTime,
   additionalDelayTime,
   receptionCalling,

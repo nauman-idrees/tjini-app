@@ -9,6 +9,7 @@ import 'package:tjini_app/ui/screens/viewer_screen.dart';
 import '../../core/di/locator.dart';
 import '../../core/enum.dart';
 import '../../models/login_response.dart';
+import '../../models/role.dart';
 import 'establishment_profile_screen.dart';
 import 'parent_profile_screen.dart';
 
@@ -23,9 +24,11 @@ class AppWrapperScreen extends StatelessWidget {
       await Future.delayed(const Duration(seconds: 2));
       bool? isLoggedIn = locator<SharedPreferencesHelper>().isLoggedIn();
       currentUser = await locator<SharedPreferencesHelper>().getCurrentUser();
-      if(currentUser != null) {
+      if (currentUser != null) {
         context.read<UserProvider>().setUser(currentUser!.user!);
-        context.read<NotificationProvider>().getNotification(currentUser!.token!);
+        context.read<NotificationProvider>().getNotification(
+          currentUser!.token!,
+        );
       }
       return HomeState(isLoggedIn: isLoggedIn);
     }
@@ -42,8 +45,10 @@ class AppWrapperScreen extends StatelessWidget {
         } else if (snapshot.hasData) {
           return snapshot.data!.isLoggedIn
               ? currentUser != null
-              ? returnCurrentScreen(currentUser!.user!.roles) // Loged In State
-              : LoginScreen()
+                    ? returnCurrentScreen(
+                        currentUser!.user!.roles,
+                      ) // Loged In State
+                    : LoginScreen()
               : LoginScreen();
         } else {
           return _showLoading(); // Default state
@@ -52,12 +57,12 @@ class AppWrapperScreen extends StatelessWidget {
     );
   }
 
-  Widget returnCurrentScreen(List<Role> roles){
+  Widget returnCurrentScreen(List<Role> roles) {
     if (roles.any(
-          (role) => role.name == UserRole.parent,
+      (role) => role.name == UserRole.parent,
     )) {
       return ParentProfileScreen();
-    }else {
+    } else {
       return EstablishmentProfileScreen();
     }
     // else {

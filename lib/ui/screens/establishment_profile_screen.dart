@@ -7,12 +7,15 @@ import 'package:gap/gap.dart';
 import 'package:provider/provider.dart';
 import 'package:tjini_app/core/enum.dart';
 import 'package:tjini_app/core/extensions.dart';
+import 'package:tjini_app/core/helper/shared_preferences_helper.dart';
 import 'package:tjini_app/models/dispatchee_model.dart';
+import 'package:tjini_app/models/user.dart';
 import 'package:tjini_app/ui/common/circle_container.dart';
 import 'package:tjini_app/ui/common/header_widget.dart';
 import 'package:tjini_app/ui/common/image_widget.dart';
 import 'package:tjini_app/ui/common/text_widget.dart';
 import 'package:tjini_app/ui/resources/app_colors.dart';
+import '../../core/di/locator.dart';
 import '../../provider/dispatcher_provider.dart';
 import '../../provider/user_provider.dart';
 import 'child_detail_screen.dart';
@@ -45,7 +48,9 @@ class EstablishmentProfileScreen extends HookWidget {
           padding: EdgeInsets.all(15),
           child: Column(
             children: [
-              HeaderWidget(),
+              HeaderWidget(
+                logout: true,
+              ),
               Gap(20),
               Row(
                 children: [
@@ -65,10 +70,7 @@ class EstablishmentProfileScreen extends HookWidget {
                     ),
                   ),
                   Gap(5),
-                  SizedBox(
-                    width: 70,
-                    child: TextWidget(title: "Nom de l’école"),
-                  ),
+                  TextWidget(title: user?.school?.name ?? ""),
                   Spacer(),
                   // Column(
                   //   children: [
@@ -125,7 +127,10 @@ class EstablishmentProfileScreen extends HookWidget {
                       ),
                     )
                   : despatcherProvider.dispatchees.isEmpty
-                  ? Text("No child to prepare yet")
+                  ? Padding(
+                      padding: const EdgeInsets.only(top: 100),
+                      child: Text("Pas encore d'enfant à préparer".hardcoded()),
+                    )
                   : SizedBox(
                       height: MediaQuery.sizeOf(context).height * 0.67,
                       child: Scrollbar(
@@ -200,6 +205,7 @@ class DispatcheeListingTile extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final user = context.read<UserProvider>().getUser();
     int timeInMin = _getRemainingTimeInMin(despatchee);
     return GestureDetector(
       onTap: onTap ?? () {},
@@ -245,28 +251,32 @@ class DispatcheeListingTile extends StatelessWidget {
                         color: Colors.black,
                       ),
                       Spacer(),
-                      ...ParentStatus.values.map((status) {
-                        return Container(
-                          width: 30,
-                          height: 30,
-                          padding: EdgeInsets.all(2),
-                          margin: EdgeInsets.only(right: 5),
-                          decoration: BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
+                      Row(
+                        spacing: 10,
+                        children: [
+                          _getStatusWidget(
+                            isSelected:
+                                ParentStatus.preparing.name ==
+                                despatchee.status,
                           ),
-                          child: Container(
-                            width: double.infinity,
-                            height: double.infinity,
-                            decoration: BoxDecoration(
-                              shape: BoxShape.circle,
-                              color: status.name == despatchee.status
-                                  ? AppColors.green
-                                  : null,
+                          _getStatusWidget(
+                            isSelected:
+                                ParentStatus.ready.name == despatchee.status,
+                          ),
+                          if (user?.isInStartWindow ?? false)
+                            _getStatusWidget(
+                              isSelected:
+                                  ParentStatus.collected.name ==
+                                  despatchee.status,
                             ),
-                          ),
-                        );
-                      }),
+                          if (user?.isInClosingWindow ?? false)
+                            _getStatusWidget(
+                              isSelected:
+                                  ParentStatus.dropped.name ==
+                                  despatchee.status,
+                            ),
+                        ],
+                      ),
                     ],
                   ),
                 ),
@@ -296,20 +306,54 @@ class DispatcheeListingTile extends StatelessWidget {
             padding: const EdgeInsets.only(right: 4.0),
             child: Row(
               mainAxisAlignment: MainAxisAlignment.end,
-              children: List.generate(
-                ParentStatus.values.length,
-                (index) {
-                  return TextWidget(
-                    title:
-                        "${ParentStatus.values[index].title()}${index != ParentStatus.values.length - 1 ? " | " : ""}",
+              children: [
+                TextWidget(
+                  title: "${ParentStatus.preparing.title()}${" | "}",
+                  size: 10,
+                  weight: FontWeight.w500,
+                ),
+                TextWidget(
+                  title: "${ParentStatus.ready.title()}${" | "}",
+                  size: 10,
+                  weight: FontWeight.w500,
+                ),
+                if (user?.isInStartWindow ?? false)
+                  TextWidget(
+                    title: "${ParentStatus.collected.title()}",
                     size: 10,
                     weight: FontWeight.w500,
-                  );
-                },
-              ),
+                  ),
+                if (user?.isInClosingWindow ?? false)
+                  TextWidget(
+                    title: "${ParentStatus.dropped.title()}",
+                    size: 10,
+                    weight: FontWeight.w500,
+                  ),
+              ],
             ),
           ),
         ],
+      ),
+    );
+  }
+
+  Container _getStatusWidget({required bool isSelected}) {
+    return Container(
+      width: 30,
+      height: 30,
+      padding: EdgeInsets.all(2),
+      margin: EdgeInsets.only(right: 5),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        shape: BoxShape.circle,
+      ),
+      child: Container(
+        width: double.infinity,
+        height: double.infinity,
+        decoration: BoxDecoration(
+          shape: BoxShape.circle,
+          color: isSelected ? AppColors.green : null,
+        ),
       ),
     );
   }
@@ -354,11 +398,7 @@ final List<Parent> mockParents = List.generate(10, (index) {
   );
 });
 
-enum ParentStatus {
-  preparing,
-  ready,
-  collected,
-}
+enum ParentStatus { preparing, ready, collected, dropped }
 
 extension ParentStatusExtension on ParentStatus {
   String title() {
@@ -366,6 +406,7 @@ extension ParentStatusExtension on ParentStatus {
       ParentStatus.preparing => "En court".hardcoded(),
       ParentStatus.ready => "PRÊT".hardcoded(),
       ParentStatus.collected => "Collecté".hardcoded(),
+      ParentStatus.dropped => "Abandonnée".hardcoded(),
     };
   }
 }
